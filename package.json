@@ -10,10 +10,10 @@
     "setup": "bun install",
     "setup:windows": "cd apps/backend && python -m venv .venv && .venv\\Scripts\\pip install -r requirements.txt",
     "setup:linux": "cd apps/backend && python -m venv .venv && .venv/bin/pip install -r requirements.txt",
-    "dev:windows": "concurrently \"bun --cwd apps/frontend dev\" \"cd apps/backend && .venv\\Scripts\\python -m uvicorn app.main:app --reload\"",
+    "dev:windows": "concurrently \"bun --cwd apps/frontend dev\" \"cd apps/backend && python -m uvicorn app.main:app --reload\"",
     "dev:linux": "concurrently \"bun --cwd apps/frontend dev\" \"cd apps/backend && .venv/bin/python -m uvicorn app.main:app --reload\"",
     "build": "bun --cwd apps/frontend build",
-    "start:windows": "bun run build && concurrently \"bun --cwd apps/frontend start\" \"cd apps/backend && .venv\\Scripts\\python -m uvicorn app.main:app --host 0.0.0.0 --port 8000\"",
+    "start:windows": "bun run build && concurrently \"bun --cwd apps/frontend start\" \"cd apps/backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000\"",
     "start:linux": "bun run build && concurrently \"bun --cwd apps/frontend start\" \"cd apps/backend && .venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000\""
   },
   "devDependencies": {
