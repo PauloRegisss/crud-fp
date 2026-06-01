@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import os
-import datetime as dt
 
 app = FastAPI()
 
@@ -64,6 +63,47 @@ def load_treinos():
                 })
     return treinos
 
+def save_exercicios(exercicios):
+    dir_failsafe()
+
+    with open(ARQ_EXERCICIOS, "w", encoding="utf-8") as f:
+        for c in exercicios:
+            linha = "|".join([
+                c.get("nome", ""),
+                c.get("treino", ""),
+                c.get("modo", ""),
+                str(c.get("series", 0)),
+                str(c.get("repeticoes", 0)),
+                str(c.get("tempo", 0)),
+                str(c.get("distancia", 0))
+            ])
+
+            f.write(linha + "\n")
+
+def load_exercicios():
+    dir_failsafe()
+
+    exercicios = []
+    if not os.path.exists(ARQ_EXERCICIOS):
+        return exercicios
+    
+    with open(ARQ_EXERCICIOS, "r", encoding="utf-8") as f:
+        for linha in f:
+            data = linha.strip().split("|")
+            
+            if len(data) >= 7:
+                exercicios.append({
+                    "nome": data[0],
+                    "treino": data[1],
+                    "modo": data[2],
+                    "series": data[3],
+                    "repeticoes": data[4],
+                    "tempo": data[5],
+                    "distancia": data[6]
+                })
+
+    return exercicios
+
 @app.get("/treinos")
 async def get_treinos():
     return load_treinos()
@@ -83,5 +123,36 @@ async def post_treino(data: dict = Body(...)):
         "meta": data.get("meta", "")
     })
     save_treinos(treinos)
+
+    return {"ok": True}
+
+@app.put("/treinos/{nome}")
+async def edit_treino(nome: str, data: dict = Body(...)):
+    treinos = load_treinos()
+
+    for c in treinos:
+        if c["nome"] == nome:
+            c["tipo"]     = data.get("tipo",     c["tipo"])
+            c["data"]     = data.get("data",     c["data"])
+            c["duracao"]  = (data.get("duracao", c["duracao"]))
+            c["objetivo"] = data.get("objetivo", c["objetivo"])
+            c["meta"]     = data.get("meta",     c["meta"])
+            save_treinos(treinos)
+            return {"ok": True}
+        
+    raise HTTPException(status_code=404, detail="Treino não encontrado")
+
+@app.delete("/treinos/{nome}")
+async def delete_treino(nome: str):
+    treinos = load_treinos()
+    filtered_treinos = [c for c in treinos if c["nome"] != nome]
+
+    if len(filtered_treinos) == len(treinos):
+        raise HTTPException(status_code=404, detail="Treino não encontrado")
+    
+    save_treinos(filtered_treinos)
+
+    exercicios = load_exercicios()
+    save_exercicios([e for e in exercicios if e["treino"] != nome])
 
     return {"ok": True}
