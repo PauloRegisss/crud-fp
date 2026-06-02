@@ -132,11 +132,11 @@ async def edit_treino(nome: str, data: dict = Body(...)):
 
     for c in treinos:
         if c["nome"] == nome:
-            c["tipo"]     = data.get("tipo",     c["tipo"])
-            c["data"]     = data.get("data",     c["data"])
-            c["duracao"]  = (data.get("duracao", c["duracao"]))
+            c["tipo"] = data.get("tipo", c["tipo"])
+            c["data"] = data.get("data", c["data"])
+            c["duracao"] = (data.get("duracao", c["duracao"]))
             c["objetivo"] = data.get("objetivo", c["objetivo"])
-            c["meta"]     = data.get("meta",     c["meta"])
+            c["meta"] = data.get("meta", c["meta"])
             save_treinos(treinos)
             return {"ok": True}
         
@@ -156,3 +156,36 @@ async def delete_treino(nome: str):
     save_exercicios([e for e in exercicios if e["treino"] != nome])
 
     return {"ok": True}
+
+@app.get("/exercicios")
+async def get_exercicios(treino: str = None):
+    exercicios = load_exercicios()
+    if treino:
+        exercicios = [e for e in exercicios if e["treino"] == treino]
+    
+    return exercicios
+
+@app.post("/exercicios")
+async def post_exercicios(data: dict = Body(...)):
+    if not data.get("nome"):
+        raise HTTPException(status_code=400, detail="Nome obrigatório")
+    
+    exercicios = load_exercicios()
+    exercicios.append({
+        "nome": data.get("nome", ""),
+        "treino": data.get("treino", ""),
+        "modo": data.get("modo", "series"),
+        "series": str(data.get("series", 0)),
+        "repeticoes": str(data.get("repeticoes", 0)),
+        "tempo": str(data.get("tempo", 0)),
+        "distancia": str(data.get("distancia", 0))
+    })
+    save_exercicios()
+
+    return {"ok": True}
+
+@app.put("/exercicios")
+async def edit_exercicios(nome: str, data: dict = Body(...)):
+
+@app.delete("/exercicios")
+async def delete_exercicios(nome: str):
