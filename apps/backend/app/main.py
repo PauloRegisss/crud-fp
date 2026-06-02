@@ -382,3 +382,50 @@ async def delete_evolucoes(index:int):
     save_evolucoes(evolucoes)
 
     return {"ok": True}
+
+def sujest(objetivo_usuario=None):
+
+    sugestoes = {
+        "Hipertrofia": {
+            "nome": "Sugestão: peito e tríceps",
+            "tipo": "Musculação",
+            "data": dt.date.today().strftime("%d/%m/%Y"),
+            "duracao": "60 min",
+            "objetivo": "Hipertrofia",
+            "meta": "Ganho de massa magra"
+        },
+        "Emagrecimento": {
+            "nome": "sujestão: corrida",
+            "tipo": "Cardio / Funcional",
+            "data": dt.date.today().strftime("%d/%m/%Y"),
+            "duracao": "45 min",
+            "objetivo": "Emagrecimento",
+            "meta": "Déficit calórico"
+        }
+    }
+        
+    lista_treinos = []
+    if os.path.exists(ARQ_TREINOS):
+        with open(ARQ_TREINOS, "r", encoding="utf-8") as f:
+            for linha in f:
+                linha = linha.strip()
+                if not linha:
+                    continue
+                partes = linha.split("|")
+                if len(partes) >= 6:
+                    lista_treinos.append({
+                        "nome": partes[0],
+                        "tipo": partes[1],
+                        "data": partes[2],
+                        "duracao": partes[3],
+                        "objetivo": partes[4],
+                        "meta": partes[5]
+                    })
+    
+    if len(lista_treinos) > 0:
+        return {"origem": "arquivo", "dados": lista_treinos}
+    
+    if objetivo_usuario in sugestoes:
+        return {"origem": "sugestao", "dados": [sugestoes[objetivo_usuario]]}
+        
+    return {"origem": "nenhum", "dados": []}
