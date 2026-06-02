@@ -104,6 +104,74 @@ def load_exercicios():
 
     return exercicios
 
+def save_metas(metas):
+    dir_failsafe()
+
+    with open(ARQ_METAS, "w", encoding="utf-8") as f:
+        for m in metas:
+            linha = "|".join([
+                m.get("descricao", ""),
+                m.get("prazo", ""),
+                m.get("status", "Em andamento")
+            ])
+
+            f.write(linha + "\n")
+
+def load_metas():
+    dir_failsafe()
+    metas = []
+
+    if not os.path.exists(ARQ_METAS):
+        return metas
+
+    with open(ARQ_METAS, "r", encoding="utf-8") as f:
+        for linha in f:
+            data = linha.strip().split("|")
+
+            if len(data) >= 3:
+                metas.append({
+                    "descricao": data[0],
+                    "prazo": data[1],
+                    "status": data[2]
+                })
+
+    return metas
+
+def save_evolucoes(evolucoes):
+    dir_failsafe()
+
+    with open(ARQ_EVOLUCAO, "w", encoding="utf-8") as f:
+        for e in evolucoes:
+            linha = "|".join([
+                e.get("data", ""),
+                str(e.get("peso", 0)),
+                str(e.get("altura", 0)),
+                str(e.get("gordura", 0))
+            ])
+
+            f.write(linha + "\n")
+
+def load_evolucoes():
+    dir_failsafe()
+    evolucoes = []
+
+    if not os.path.exists(ARQ_EVOLUCAO):
+        return evolucoes
+
+    with open(ARQ_EVOLUCAO, "r", encoding="utf-8") as f:
+        for linha in f:
+            data = linha.strip().split("|")
+
+            if len(data) >= 4:
+                evolucoes.append({
+                    "data": data[0],
+                    "peso": data[1],
+                    "altura": data[2],
+                    "gordura": data[3]
+                })
+
+    return evolucoes
+
 @app.get("/treinos")
 async def get_treinos():
     return load_treinos()
