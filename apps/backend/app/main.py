@@ -24,7 +24,7 @@ ARQ_EVOLUCAO = os.path.join(BASE_DIR, "data", "evolucao.txt")
 def dir_failsafe():
     os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
 
-
+#TREINOS
 def save_treinos(treinos):
     dir_failsafe()
 
@@ -63,6 +63,7 @@ def load_treinos():
                 })
     return treinos
 
+#EXERCICIOS
 def save_exercicios(exercicios):
     dir_failsafe()
 
@@ -104,6 +105,7 @@ def load_exercicios():
 
     return exercicios
 
+#METAS
 def save_metas(metas):
     dir_failsafe()
 
@@ -137,6 +139,7 @@ def load_metas():
 
     return metas
 
+#EVOLUCOES
 def save_evolucoes(evolucoes):
     dir_failsafe()
 
@@ -172,6 +175,7 @@ def load_evolucoes():
 
     return evolucoes
 
+#ROTAS TREINOS
 @app.get("/treinos")
 async def get_treinos():
     return load_treinos()
@@ -227,6 +231,7 @@ async def delete_treino(nome: str):
 
     return {"ok": True}
 
+#ROTAS EXERCICIOS
 @app.get("/exercicios")
 async def get_exercicios(treino: str = None):
     exercicios = load_exercicios()
@@ -261,14 +266,13 @@ async def edit_exercicios(index: int, data: dict = Body(...)):
     if index < 0 or index >= len(exercicios):
         raise HTTPException(status_code=404, detail="Exercício não encontrado")
     
-    e = exercicios[index]
-    e["nome"] = data.get("nome", e["nome"])
-    e["treino"] = data.get("treino", e["treino"])
-    e["modo"] = data.get("modo", e["modo"])
-    e["series"] = data.get("series", e["series"])
-    e["repeticoes"] = data.get("repeticoes", e["repeticoes"])
-    e["tempo"] = data.get("tempo", e["tempo"])
-    e["distancia"] = data.get("distancia", e["distancia"])
+    exercicios[index]["nome"] = data.get("nome", exercicios[index]["nome"])
+    exercicios[index]["treino"] = data.get("treino", exercicios[index]["treino"])
+    exercicios[index]["modo"] = data.get("modo", exercicios[index]["modo"])
+    exercicios[index]["series"] = data.get("series", exercicios[index]["series"])
+    exercicios[index]["repeticoes"] = data.get("repeticoes", exercicios[index]["repeticoes"])
+    exercicios[index]["tempo"] = data.get("tempo", exercicios[index]["tempo"])
+    exercicios[index]["distancia"] = data.get("distancia", exercicios[index]["distancia"])
 
     save_exercicios(exercicios)
     return {"ok": True}
@@ -282,5 +286,99 @@ async def delete_exercicios(index: int):
     
     exercicios.pop(index)
     save_exercicios(exercicios)
+
+    return {"ok": True}
+
+#ROTAS METAS
+@app.get("/metas")
+async def get_metas():
+    return load_metas()
+
+@app.post("/metas")
+async def post_metas(data: dict = Body(...)):
+    if not data.get("descricao"):
+        raise HTTPException(status_code=400, detail="Descrição obrigatória")
+    
+    metas = load_metas()
+    metas.append({
+        "descricao": data.get("descricao", ""),
+        "prazo": data.get("prazo", ""),
+        "status": data.get("status", "Em andamento")
+    })
+    save_metas(metas)
+
+    return {"ok": True}
+
+@app.put("/metas/{index}")
+async def edit_meta(index: int, data: dict = Body(...)):
+    metas = load_metas()
+
+    if index < 0 or index > len(metas):
+        raise HTTPException(status_code=404, detail="Meta não encontrada")
+    
+    metas[index]["descricao"] = data.get("descricao", metas[index]["descricao"])
+    metas[index]["prazo"] = data.get("prazo", metas[index]["prazo"])
+    metas[index]["status"] = data.get("status", metas[index]["status"])
+
+    save_metas(metas)
+    return {"ok": True}
+
+@app.delete("/metas/{index}")
+async def delete_meta(index: int):
+    metas = load_metas()
+
+    if index < 0 or index >= len(metas):
+        raise HTTPException(status_code=404, detail="Meta não encontrada")
+    
+    metas.pop(index)
+    save_metas(metas)
+
+    return {"ok": True}
+
+#ROTAS EVOLUCOES
+@app.get("/evolucoes")
+async def get_evolcuoes():
+    return load_evolucoes()
+
+@app.post("/evolucoes")
+async def post_evolucoes(data: dict = Body(...)):
+    if not data.get("data"):
+        raise HTTPException(status_code=400, detail="Data obrigatória")
+    
+    evolucoes = load_evolucoes()
+    evolucoes.append({
+        "data": data.get("data", ""),
+        "peso": data.get("peso", ""),
+        "altura": data.get("altura", ""),
+        "gordura": data.get("gordura", "")
+    })
+    save_evolucoes(evolucoes)
+
+    return {"ok": True}
+
+@app.put("/evolucoes/{index}")
+async def edit_evolucoes(index: int, data: dict = Body(...)):
+    evolucoes = load_evolucoes()
+
+    if index < 0 or index > len(evolucoes):
+        raise HTTPException(status_code=404, detail="Evoluções não encontrada")
+    
+    evolucoes[index]["data"] = data.get("data", evolucoes[index]["data"])
+    evolucoes[index]["peso"] = data.get("peso", evolucoes[index]["peso"])
+    evolucoes[index]["altura"] = data.get("altura", evolucoes[index]["altura"])
+    evolucoes[index]["gordura"] = data.get("gordura", evolucoes[index]["gordura"])
+
+    save_evolucoes(evolucoes)
+    return {"ok": True}
+
+@app.delete("/evolucoes/{index}")
+async def delete_evolucoes(index:int):
+    evolucoes = load_evolucoes()
+
+    if index < 0 or index >= len(evolucoes):
+        raise HTTPException(status_code=404, detail="Evoluções não encontrada")
+    
+    evolucoes.pop(index)
+    save_evolucoes(evolucoes)
 
     return {"ok": True}
