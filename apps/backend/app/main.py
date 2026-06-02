@@ -134,14 +134,16 @@ async def edit_treino(nome: str, data: dict = Body(...)):
         if c["nome"] == nome:
             c["tipo"] = data.get("tipo", c["tipo"])
             c["data"] = data.get("data", c["data"])
-            c["duracao"] = (data.get("duracao", c["duracao"]))
+            c["duracao"] = data.get("duracao", c["duracao"])
             c["objetivo"] = data.get("objetivo", c["objetivo"])
             c["meta"] = data.get("meta", c["meta"])
-            save_treinos(treinos)
-            return {"ok": True}
-        
-    raise HTTPException(status_code=404, detail="Treino não encontrado")
+            break
+    else:
+        raise HTTPException(status_code=404, detail="Treino não encontrado")
 
+    save_treinos(treinos)
+    return {"ok": True}
+        
 @app.delete("/treinos/{nome}")
 async def delete_treino(nome: str):
     treinos = load_treinos()
@@ -180,12 +182,37 @@ async def post_exercicios(data: dict = Body(...)):
         "tempo": str(data.get("tempo", 0)),
         "distancia": str(data.get("distancia", 0))
     })
-    save_exercicios()
+    save_exercicios(exercicios)
 
     return {"ok": True}
 
-@app.put("/exercicios")
-async def edit_exercicios(nome: str, data: dict = Body(...)):
+@app.put("/exercicios/{index}")
+async def edit_exercicios(index: int, data: dict = Body(...)):
+    exercicios = load_exercicios()
 
-@app.delete("/exercicios")
-async def delete_exercicios(nome: str):
+    if index < 0 or index >= len(exercicios):
+        raise HTTPException(status_code=404, detail="Exercício não encontrado")
+    
+    e = exercicios[index]
+    e["nome"] = data.get("nome", e["nome"])
+    e["treino"] = data.get("treino", e["treino"])
+    e["modo"] = data.get("modo", e["modo"])
+    e["series"] = data.get("series", e["series"])
+    e["repeticoes"] = data.get("repeticoes", e["repeticoes"])
+    e["tempo"] = data.get("tempo", e["tempo"])
+    e["distancia"] = data.get("distancia", e["distancia"])
+
+    save_exercicios(exercicios)
+    return {"ok": True}
+
+@app.delete("/exercicios/{index}")
+async def delete_exercicios(index: int):
+    exercicios = load_exercicios()
+
+    if index < 0 or index >= len(exercicios):
+        raise HTTPException(status_code=404, detail="Exercício não encontrado")
+    
+    exercicios.pop(index)
+    save_exercicios(exercicios)
+
+    return {"ok": True}
