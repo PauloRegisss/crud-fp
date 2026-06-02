@@ -98,7 +98,7 @@ def sujest(objetivo_usuario=None):
             "meta": "Ganho de massa magra"
         },
         "Emagrecimento": {
-            "nome": "corrida",
+            "nome": "sujestão: corrida",
             "tipo": "Cardio / Funcional",
             "data": dt.date.today().strftime("%d/%m/%Y"),
             "duracao": "45 min",
