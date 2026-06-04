@@ -314,7 +314,7 @@ async def post_metas(data: dict = Body(...)):
 async def edit_meta(index: int, data: dict = Body(...)):
     metas = load_metas()
 
-    if index < 0 or index > len(metas):
+    if index < 0 or index >= len(metas):
         raise HTTPException(status_code=404, detail="Meta não encontrada")
     
     metas[index]["descricao"] = data.get("descricao", metas[index]["descricao"])
@@ -338,8 +338,8 @@ async def delete_meta(index: int):
 
 #ROTAS EVOLUCOES
 @app.get("/evolucoes")
-async def get_evolcuoes():
-    return load_evolucoes()
+async def get_sugestoes(objetivo: str = None):
+    return sujest(objetivo)
 
 @app.post("/evolucoes")
 async def post_evolucoes(data: dict = Body(...)):
@@ -361,7 +361,7 @@ async def post_evolucoes(data: dict = Body(...)):
 async def edit_evolucoes(index: int, data: dict = Body(...)):
     evolucoes = load_evolucoes()
 
-    if index < 0 or index > len(evolucoes):
+    if index < 0 or index >= len(evolucoes):
         raise HTTPException(status_code=404, detail="Evoluções não encontrada")
     
     evolucoes[index]["data"] = data.get("data", evolucoes[index]["data"])
@@ -396,7 +396,7 @@ def sujest(objetivo_usuario=None):
             "meta": "Ganho de massa magra"
         },
         "Emagrecimento": {
-            "nome": "sujestão: corrida",
+            "nome": "Sujestão: corrida",
             "tipo": "Cardio / Funcional",
             "data": dt.date.today().strftime("%d/%m/%Y"),
             "duracao": "45 min",
