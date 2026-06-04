@@ -1,9 +1,16 @@
-from google import genai
+from dotenv import load_dotenv
+load_dotenv()
+import os
+import anthropic
 
-client = genai.Client(api_key="AQ.Ab8RN6KoLllEYahx75uRWnrOf0hBnVoD8tXxmNlnuohGxDj2Hw")
+client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-response = client.models.generate_content(
-    model="gemini-2.0-flash",
-    contents="me sugira um treino para hipertrofia"
+message = client.messages.create(
+    model="claude-opus-4-6",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "me sugira um treino para hipertrofia"}
+    ]
 )
-print(response.text)
+
+print(message.content[0].text)
