@@ -1,216 +1,129 @@
-import { Sidebar } from "@/components/sidebar";
-import {
-	Dumbbell,
-	Target,
-	Flame,
-	Clock3,
-} from "lucide-react";
-
-const stats = [
-	{
-		title: "Treinos da Semana",
-		value: "4",
-		icon: Dumbbell,
-	},
-	{
-		title: "Meta de Peso",
-		value: "-2.5kg",
-		icon: Target,
-	},
-	{
-		title: "Horas Treinadas",
-		value: "6.5h",
-		icon: Clock3,
-	},
-	{
-		title: "Sequência Atual",
-		value: "12 dias",
-		icon: Flame,
-	},
-];
+"use client";
+import { Clock3, Dumbbell, Flame, LoaderCircle, Target } from "lucide-react";
+import { useEffect, useState } from "react";
+import useAuth, {
+	type Exercicio,
+	type Meta,
+	type Treino,
+} from "../login/auth-context";
 
 export default function DashboardPage() {
-	return (
-		<div className="flex min-h-screen bg-[#fafafa]">
-			<Sidebar />
+	const { user, isLoading, fetchTreinos, fetchMetas, fetchExercicios } =
+		useAuth();
+	const [treinos, setTreinos] = useState<Treino[] | null>(null);
+	const [metas, setMetas] = useState<Meta[] | null>(null);
+	const [exercicios, setExercicios] = useState<Exercicio[] | null>(null);
+	useEffect(() => {
+		fetchTreinos().then(setTreinos).catch(console.error);
+		fetchMetas().then(setMetas).catch(console.error);
+		fetchExercicios().then(setExercicios).catch(console.error);
+	}, [fetchTreinos, fetchMetas, fetchExercicios]);
+	if (isLoading && !user && !treinos && !metas && !exercicios) {
+		return (
+			<div className="h-full w-full flex justify-center items-center">
+				<LoaderCircle size={100} className="animate-spin text-gray-700" />
+			</div>
+		);
+	}
 
-			<main className="flex-1 p-8">
-				<div className="mb-8 flex items-start justify-between">
-					<div>
-						<h1 className="text-3xl font-bold">
-							Olá, Marina! 👋
-						</h1>
+	if (user && !isLoading && treinos && metas && exercicios) {
+		console.log(treinos);
+		const stats = [
+			{
+				title: "Total de treinos",
+				value: treinos?.length,
+				icon: Dumbbell,
+			},
+			{
+				title: "Total de Metas",
+				value: metas.length,
+				icon: Target,
+			},
+			{
+				title: "Total de Exercícios",
+				value: exercicios.length,
+				icon: Clock3,
+			},
+		];
+		return (
+			<div className="min-h-screen bg-[#f8faf8]">
+				<div className="flex">
+					<main className="flex-1 p-10">
+						<div className="mb-8">
+							<h2 className="text-4xl font-extrabold">
+								Olá, {user.nome || "usuário"}
+							</h2>
+							<p className="text-muted-foreground">
+								Acompanhe sua evolução fitness.
+							</p>
+						</div>
 
-						<p className="mt-1 text-muted-foreground">
-							Aqui está o resumo da sua evolução fitness
-						</p>
-					</div>
+						<div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+							{stats.map((stat) => {
+								const Icon = stat.icon;
 
-					<button className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white shadow">
-						+ Novo Plano
-					</button>
-				</div>
+								return (
+									<div
+										key={stat.title}
+										className="rounded-2xl border bg-card p-6 shadow-lg shadow-black/5"
+									>
+										<div className="mb-4 flex justify-between">
+											<span className="text-muted-foreground">
+												{stat.title}
+											</span>
 
-				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-					{stats.map((stat) => {
-						const Icon = stat.icon;
+											<Icon className="text-primary" />
+										</div>
 
-						return (
-							<div
-								key={stat.title}
-								className="rounded-2xl border bg-white p-6 shadow-sm"
-							>
-								<div className="mb-5 flex items-center justify-between">
-									<span className="text-sm text-muted-foreground">
-										{stat.title}
-									</span>
-
-									<div className="rounded-lg bg-muted p-2">
-										<Icon className="size-4 text-primary" />
+										<h3 className="text-3xl font-bold">{stat.value}</h3>
 									</div>
+								);
+							})}
+						</div>
+
+						<div className="mt-8 grid gap-6 lg:grid-cols-2">
+							<div className="rounded-2xl border bg-card p-6 shadow-lg shadow-black/5">
+								<h3 className="mb-4 text-xl font-bold">Treinos Recentes</h3>
+								<div className="space-y-4">
+									{treinos.slice(0, 3).map((treino, _) => (
+										<div
+											// biome-ignore lint/suspicious/noArrayIndexKey: <>
+											key={treino.nome + _}
+											className="rounded-xl bg-muted/50 p-4"
+										>
+											{treino.nome}
+										</div>
+									))}
 								</div>
-
-								<h2 className="text-4xl font-bold">
-									{stat.value}
-								</h2>
-							</div>
-						);
-					})}
-				</div>
-
-				<div className="mt-6 grid gap-4 xl:grid-cols-[2fr_1fr]">
-					<div className="rounded-2xl border bg-white p-6 shadow-sm">
-						<h3 className="mb-6 text-xl font-semibold">
-							Treinos Recentes
-						</h3>
-
-						<div className="space-y-4">
-							<div className="flex items-center justify-between rounded-xl bg-muted/40 p-4">
-								<div>
-									<p className="font-medium">
-										Treino A - Peito e Tríceps
-									</p>
-
-									<p className="text-sm text-muted-foreground">
-										Musculação • 55 min
-									</p>
-								</div>
-
-								<span className="text-sm text-muted-foreground">
-									Hoje
-								</span>
 							</div>
 
-							<div className="flex items-center justify-between rounded-xl bg-muted/40 p-4">
-								<div>
-									<p className="font-medium">
-										Corrida Intervalada
-									</p>
+							<div className="rounded-2xl border bg-card p-6 shadow-lg shadow-black/5">
+								<h3 className="mb-4 text-xl font-bold">Metas Atuais</h3>
 
-									<p className="text-sm text-muted-foreground">
-										Cardio • 30 min
-									</p>
+								<div className="space-y-5">
+									{metas.slice(0, 3).map((meta, _) => (
+										<div
+											// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+											key={meta.descricao + _}
+											className="flex justify-between"
+										>
+											<p className="mb-2 font-medium">{meta.descricao}</p>
+											<div>
+												<p className="mb-2 text-sm text-gray-600">
+													{meta.status}
+												</p>
+												<p className="mb-2 text-sm text-gray-600">
+													Prazo: {meta.prazo} dias
+												</p>
+											</div>
+										</div>
+									))}
 								</div>
-
-								<span className="text-sm text-muted-foreground">
-									Ontem
-								</span>
-							</div>
-
-							<div className="flex items-center justify-between rounded-xl bg-muted/40 p-4">
-								<div>
-									<p className="font-medium">
-										Treino B - Costas e Bíceps
-									</p>
-
-									<p className="text-sm text-muted-foreground">
-										Musculação • 50 min
-									</p>
-								</div>
-
-								<span className="text-sm text-muted-foreground">
-									2 dias atrás
-								</span>
-							</div>
-
-							<div className="flex items-center justify-between rounded-xl bg-muted/40 p-4">
-								<div>
-									<p className="font-medium">
-										Treino Funcional
-									</p>
-
-									<p className="text-sm text-muted-foreground">
-										Funcional • 40 min
-									</p>
-								</div>
-
-								<span className="text-sm text-muted-foreground">
-									3 dias atrás
-								</span>
 							</div>
 						</div>
-					</div>
-
-					<div className="rounded-2xl border bg-white p-6 shadow-sm">
-						<h3 className="mb-6 text-xl font-semibold">
-							Suas Metas
-						</h3>
-
-						<div className="space-y-6">
-							<div>
-								<div className="mb-2 flex justify-between">
-									<span>Perder 5kg</span>
-									<span className="text-sm text-green-600">
-										50%
-									</span>
-								</div>
-
-								<div className="h-2 rounded-full bg-muted">
-									<div className="h-2 w-1/2 rounded-full bg-green-500" />
-								</div>
-
-								<p className="mt-2 text-xs text-muted-foreground">
-									2.5kg perdidos
-								</p>
-							</div>
-
-							<div>
-								<div className="mb-2 flex justify-between">
-									<span>Treinar 4x por semana</span>
-									<span className="text-sm text-blue-600">
-										75%
-									</span>
-								</div>
-
-								<div className="h-2 rounded-full bg-muted">
-									<div className="h-2 w-3/4 rounded-full bg-blue-500" />
-								</div>
-
-								<p className="mt-2 text-xs text-muted-foreground">
-									3/4 esta semana
-								</p>
-							</div>
-
-							<div>
-								<div className="mb-2 flex justify-between">
-									<span>Correr 5km sem parar</span>
-									<span className="text-sm text-violet-600">
-										60%
-									</span>
-								</div>
-
-								<div className="h-2 rounded-full bg-muted">
-									<div className="h-2 w-[60%] rounded-full bg-violet-500" />
-								</div>
-
-								<p className="mt-2 text-xs text-muted-foreground">
-									3km alcançados
-								</p>
-							</div>
-						</div>
-					</div>
+					</main>
 				</div>
-			</main>
-		</div>
-	);
+			</div>
+		);
+	}
 }

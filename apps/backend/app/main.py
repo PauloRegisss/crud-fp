@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 import os
 import datetime as dt
 from dotenv import load_dotenv
@@ -13,8 +14,7 @@ client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -133,10 +133,10 @@ def save_metas(usuario: str, metas: list):
     with open(path, "w", encoding="utf-8") as f:
         for m in metas:
             linha = "|".join([
-                m.get("descricao", ""),
-                m.get("prazo", ""),
-                m.get("status", "Em andamento")
-            ])
+        str(m.get("descricao", "")),
+        str(m.get("prazo", "")),
+        str(m.get("status", "Em andamento"))
+    ])
             f.write(linha + "\n")
 
 def load_metas(usuario: str) -> list:
@@ -483,3 +483,23 @@ async def agente(usuario: str, data: dict = Body(...)):
     )
     resposta = message.content[0].text
     return {"resposta": resposta}
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Custom title",
+        version="2.5.0",
+        summary="This is a very custom OpenAPI schema",
+        description="Here's a longer description of the custom **OpenAPI** schema",
+        routes=app.routes,
+    )
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
