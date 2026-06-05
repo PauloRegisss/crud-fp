@@ -2,8 +2,13 @@ from fastapi import FastAPI, Body, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import datetime as dt
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+import anthropic 
 
 app = FastAPI()
+
+client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 app.add_middleware(
     CORSMiddleware,
@@ -430,3 +435,54 @@ def sujest(objetivo_usuario=None):
         return {"origem": "sugestao", "dados": [sugestoes[objetivo_usuario]]}
         
     return {"origem": "nenhum", "dados": []}
+
+# ROTA AGENTE
+def montar_contexto():
+    treinos = load_treinos()
+    exercicios = load_exercicios()
+    metas = load_metas()
+    evolucoes = load_evolucoes()
+
+    contexto = "Você é um assistente personal trainer inteligente. Responda em português.\n\n"
+
+    contexto += "=== TREINOS DO USUÁRIO ===\n"
+    for t in treinos:
+        contexto += f"- {t['nome']} | Tipo: {t['tipo']} | Data: {t['data']} | Duração: {t['duracao']} | Objetivo: {t['objetivo']} | Meta: {t['meta']}\n"
+
+    contexto += "\n=== EXERCÍCIOS ===\n"
+    for e in exercicios:
+        contexto += f"- {e['nome']} | Treino: {e['treino']} | Modo: {e['modo']} | Séries: {e['series']} | Reps: {e['repeticoes']} | Tempo: {e['tempo']}min | Distância: {e['distancia']}km\n"
+
+    contexto += "\n=== METAS ===\n"
+    for m in metas:
+        contexto += f"- {m['descricao']} | Prazo: {m['prazo']} | Status: {m['status']}\n"
+
+    contexto += "\n=== EVOLUÇÃO FÍSICA ===\n"
+    for ev in evolucoes:
+        contexto += f"- Data: {ev['data']} | Peso: {ev['peso']}kg | Altura: {ev['altura']}m | Gordura: {ev['gordura']}%\n"
+
+    return contexto
+
+
+@app.post("/agente")
+async def agente(data: dict = Body(...)):
+    pergunta = data.get("pergunta", "").strip()
+
+    if not pergunta:
+        raise HTTPException(status_code=400, detail="Pergunta obrigatória")
+
+    contexto = montar_contexto()
+
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": f"{contexto}\n\nPergunta do usuário: {pergunta}"
+            }
+        ]
+    )
+
+    resposta = message.content[0].text
+    return {"resposta": resposta}
