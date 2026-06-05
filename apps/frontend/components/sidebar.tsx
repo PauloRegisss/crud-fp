@@ -90,12 +90,15 @@ function UserCard() {
 	);
 }
 
-function LogoutButton({ onNavigate }: { onNavigate?: () => void }) {
+function LogoutButton() {
 	return (
 		<Button
 			type="button"
 			variant={"destructive"}
-			onClick={onNavigate}
+			onClick={() => {
+				localStorage.removeItem("auth_info");
+				window.location.href = "/login";
+			}}
 			className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50"
 		>
 			<LogOut className="size-4.5 text-red-500" />
@@ -125,13 +128,7 @@ function MobileSidebar() {
 						<SidebarNav onNavigate={() => setOpen(false)} />
 						<UserCard />
 						<Separator className="bg-[#e8f0e8]" />
-						<LogoutButton
-							onNavigate={() => {
-								setOpen(false);
-								localStorage.removeItem("auth_info");
-								router.push("/login");
-							}}
-						/>
+						<LogoutButton />
 					</div>
 				</SheetContent>
 			</Sheet>
