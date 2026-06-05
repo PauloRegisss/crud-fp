@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import useAuth, { type Exercicio, type Treino } from "@/app/login/auth-context";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -134,12 +135,9 @@ function CreateTreinoDialog({ onCreated }: { onCreated: () => void }) {
 							placeholder="Ex: Aumentar massa muscular"
 						/>
 					</div>
-					<Button type="submit" disabled={loading} className="mt-2">
-						{loading ? (
-							<LoaderCircle className="size-4 animate-spin" />
-						) : (
-							"Criar Treino"
-						)}
+					<Button type="submit" disabled={loading} className="mt-2 gap-1.5">
+						{loading && <LoaderCircle className="size-4 animate-spin" />}
+						{loading ? "Criando..." : "Criar Treino"}
 					</Button>
 				</form>
 			</DialogContent>
@@ -236,7 +234,7 @@ function AddExercicioForm({
 				) : (
 					<Plus className="size-3" />
 				)}
-				Adicionar
+				{loading ? "Adicionando..." : "Adicionar"}
 			</Button>
 		</form>
 	);
@@ -256,6 +254,13 @@ export default function PlanosPage() {
 	const [loading, setLoading] = useState(true);
 	const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
+	const [deleteTarget, setDeleteTarget] = useState<{
+		type: "treino" | "exercicio";
+		name?: string;
+		index?: number;
+	} | null>(null);
+	const [deleting, setDeleting] = useState(false);
+
 	async function loadData() {
 		try {
 			const [t, e] = await Promise.all([fetchTreinos(), fetchExercicios()]);
@@ -273,16 +278,25 @@ export default function PlanosPage() {
 		if (user) loadData();
 	}, [user]);
 
-	async function handleDeleteTreino(nome: string) {
-		if (!confirm(`Deseja excluir o treino "${nome}"?`)) return;
-		await deleteTreino(nome);
-		loadData();
-	}
-
-	async function handleDeleteExercicio(index: number) {
-		if (!confirm("Deseja excluir este exercício?")) return;
-		await deleteExercicio(index);
-		loadData();
+	async function handleConfirmDelete() {
+		if (!deleteTarget) return;
+		setDeleting(true);
+		try {
+			if (deleteTarget.type === "treino" && deleteTarget.name) {
+				await deleteTreino(deleteTarget.name);
+			} else if (
+				deleteTarget.type === "exercicio" &&
+				deleteTarget.index !== undefined
+			) {
+				await deleteExercicio(deleteTarget.index);
+			}
+			setDeleteTarget(null);
+			await loadData();
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setDeleting(false);
+		}
 	}
 
 	if (isLoading || loading) {
@@ -295,6 +309,24 @@ export default function PlanosPage() {
 
 	return (
 		<div className="min-h-screen bg-[#f8faf8] p-6 md:p-10">
+			<ConfirmDialog
+				open={deleteTarget !== null}
+				onOpenChange={(open) => {
+					if (!open) setDeleteTarget(null);
+				}}
+				title={
+					deleteTarget?.type === "treino"
+						? `Excluir treino "${deleteTarget.name}"?`
+						: "Excluir exercício?"
+				}
+				description={
+					deleteTarget?.type === "treino"
+						? "Essa ação também removerá todos os exercícios associados e não pode ser desfeita."
+						: "Essa ação não pode ser desfeita."
+				}
+				onConfirm={handleConfirmDelete}
+			/>
+
 			<div className="mb-8 flex items-center justify-between">
 				<div>
 					<h1 className="text-2xl font-bold text-[#0f1a0f]">
@@ -379,7 +411,7 @@ export default function PlanosPage() {
 											size="icon-sm"
 											onClick={(e) => {
 												e.stopPropagation();
-												handleDeleteTreino(treino.nome);
+												setDeleteTarget({ type: "treino", name: treino.nome });
 											}}
 											className="text-red-500 hover:bg-red-50 hover:text-red-600"
 										>
@@ -419,7 +451,6 @@ export default function PlanosPage() {
 												)}
 											</div>
 										)}
-
 										{treinoExercicios.length > 0 ? (
 											<div className="flex flex-col gap-2">
 												{treinoExercicios.map((ex, i) => {
@@ -448,7 +479,10 @@ export default function PlanosPage() {
 																variant="ghost"
 																size="icon-sm"
 																onClick={() =>
-																	handleDeleteExercicio(globalIndex)
+																	setDeleteTarget({
+																		type: "exercicio",
+																		index: globalIndex,
+																	})
 																}
 																className="text-red-500 hover:bg-red-50 hover:text-red-600"
 															>

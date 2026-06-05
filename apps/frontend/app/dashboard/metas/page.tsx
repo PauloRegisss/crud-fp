@@ -1,6 +1,9 @@
 "use client";
 
+import { LoaderCircle, Plus, Target, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import useAuth, { type Meta } from "@/app/login/auth-context";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,14 +15,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LoaderCircle, Plus, Target, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 
 function CreateMetaDialog({ onCreated }: { onCreated: () => void }) {
 	const [open, setOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const { createMeta } = useAuth();
-	const [form, setForm] = useState({ descricao: "", prazo: "", status: "Em andamento" });
+	const [form, setForm] = useState({
+		descricao: "",
+		prazo: "",
+		status: "Em andamento",
+	});
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -86,8 +91,9 @@ function CreateMetaDialog({ onCreated }: { onCreated: () => void }) {
 							<option value="Pendente">Pendente</option>
 						</select>
 					</div>
-					<Button type="submit" disabled={loading} className="mt-2">
-						{loading ? <LoaderCircle className="size-4 animate-spin" /> : "Criar Meta"}
+					<Button type="submit" disabled={loading} className="mt-2 gap-1.5">
+						{loading && <LoaderCircle className="size-4 animate-spin" />}
+						{loading ? "Criando..." : "Criar Meta"}
 					</Button>
 				</form>
 			</DialogContent>
@@ -106,6 +112,7 @@ export default function MetasPage() {
 	const [metas, setMetas] = useState<Meta[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [filter, setFilter] = useState<string>("Todas");
+	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 
 	async function loadData() {
 		try {
@@ -118,17 +125,20 @@ export default function MetasPage() {
 		}
 	}
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (user) loadData();
 	}, [user]);
 
-	async function handleDelete(index: number) {
-		if (!confirm("Deseja excluir esta meta?")) return;
-		await deleteMeta(index);
-		loadData();
+	async function handleConfirmDelete() {
+		if (deleteIndex === null) return;
+		await deleteMeta(deleteIndex);
+		setDeleteIndex(null);
+		await loadData();
 	}
 
-	const filtered = filter === "Todas" ? metas : metas.filter((m) => m.status === filter);
+	const filtered =
+		filter === "Todas" ? metas : metas.filter((m) => m.status === filter);
 
 	if (isLoading || loading) {
 		return (
@@ -140,10 +150,22 @@ export default function MetasPage() {
 
 	return (
 		<div className="min-h-screen bg-[#f8faf8] p-6 md:p-10">
+			<ConfirmDialog
+				open={deleteIndex !== null}
+				onOpenChange={(open) => {
+					if (!open) setDeleteIndex(null);
+				}}
+				title="Excluir meta?"
+				description="Essa ação não pode ser desfeita."
+				onConfirm={handleConfirmDelete}
+			/>
+
 			<div className="mb-8 flex items-center justify-between">
 				<div>
 					<h1 className="text-2xl font-bold text-[#0f1a0f]">Metas</h1>
-					<p className="text-sm text-[#6a7a6a]">Acompanhe seus objetivos e prazos</p>
+					<p className="text-sm text-[#6a7a6a]">
+						Acompanhe seus objetivos e prazos
+					</p>
 				</div>
 				<CreateMetaDialog onCreated={loadData} />
 			</div>
@@ -169,16 +191,19 @@ export default function MetasPage() {
 				<div className="flex flex-col items-center justify-center rounded-2xl border bg-white py-16 shadow-sm">
 					<Target className="size-12 text-[#4a5a4a]/30" />
 					<p className="mt-4 text-[#4a5a4a]">Nenhuma meta cadastrada</p>
-					<p className="text-sm text-[#8a9a8a]">Clique em "Nova Meta" para começar</p>
+					<p className="text-sm text-[#8a9a8a]">
+						Clique em "Nova Meta" para começar
+					</p>
 				</div>
 			) : (
 				<div className="flex flex-col gap-3">
 					{filtered.map((meta, i) => {
 						const realIndex = metas.indexOf(meta);
-						const colorClass = statusColors[meta.status ?? "Pendente"] ?? statusColors.Pendente;
+						const colorClass =
+							statusColors[meta.status ?? "Pendente"] ?? statusColors.Pendente;
 						return (
 							<div
-								key={`${meta.descricao}-${i}`}
+								key={`${meta.descricao}-${String(i)}`}
 								className="flex items-center justify-between rounded-2xl border bg-white p-5 shadow-sm"
 							>
 								<div className="flex items-center gap-4">
@@ -186,7 +211,9 @@ export default function MetasPage() {
 										<Target className="size-5 text-green-600" />
 									</div>
 									<div>
-										<h3 className="font-semibold text-[#0f1a0f]">{meta.descricao}</h3>
+										<h3 className="font-semibold text-[#0f1a0f]">
+											{meta.descricao}
+										</h3>
 										<div className="flex items-center gap-2 text-sm text-[#6a7a6a]">
 											{meta.prazo && <span>Prazo: {meta.prazo} dias</span>}
 										</div>
@@ -199,7 +226,7 @@ export default function MetasPage() {
 									<Button
 										variant="ghost"
 										size="icon-sm"
-										onClick={() => handleDelete(realIndex)}
+										onClick={() => setDeleteIndex(realIndex)}
 										className="text-red-500 hover:bg-red-50 hover:text-red-600"
 									>
 										<Trash2 className="size-4" />

@@ -1,6 +1,9 @@
 "use client";
 
+import { LoaderCircle, Plus, Trash2, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
 import useAuth, { type Evolucao } from "@/app/login/auth-context";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -11,14 +14,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LoaderCircle, Plus, Trash2, TrendingUp } from "lucide-react";
-import { useEffect, useState } from "react";
 
 function CreateEvolucaoDialog({ onCreated }: { onCreated: () => void }) {
 	const [open, setOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const { createEvolucao } = useAuth();
-	const [form, setForm] = useState({ data: "", peso: "", altura: "", gordura: "" });
+	const [form, setForm] = useState({
+		data: "",
+		peso: "",
+		altura: "",
+		gordura: "",
+	});
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -98,8 +104,9 @@ function CreateEvolucaoDialog({ onCreated }: { onCreated: () => void }) {
 							/>
 						</div>
 					</div>
-					<Button type="submit" disabled={loading} className="mt-2">
-						{loading ? <LoaderCircle className="size-4 animate-spin" /> : "Registrar"}
+					<Button type="submit" disabled={loading} className="mt-2 gap-1.5">
+						{loading && <LoaderCircle className="size-4 animate-spin" />}
+						{loading ? "Registrando..." : "Registrar"}
 					</Button>
 				</form>
 			</DialogContent>
@@ -111,6 +118,7 @@ export default function EvolucaoPage() {
 	const { user, isLoading, fetchEvolucoes, deleteEvolucao } = useAuth();
 	const [evolucoes, setEvolucoes] = useState<Evolucao[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 
 	async function loadData() {
 		try {
@@ -123,21 +131,24 @@ export default function EvolucaoPage() {
 		}
 	}
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (user) loadData();
 	}, [user]);
 
-	async function handleDelete(index: number) {
-		if (!confirm("Deseja excluir esta medição?")) return;
-		await deleteEvolucao(index);
-		loadData();
+	async function handleConfirmDelete() {
+		if (deleteIndex === null) return;
+		await deleteEvolucao(deleteIndex);
+		setDeleteIndex(null);
+		await loadData();
 	}
 
 	const pesoEntries = evolucoes
 		.filter((e) => e.peso)
 		.map((e) => ({ data: e.data, valor: Number(e.peso) }));
 
-	const maxPeso = pesoEntries.length > 0 ? Math.max(...pesoEntries.map((e) => e.valor)) : 1;
+	const maxPeso =
+		pesoEntries.length > 0 ? Math.max(...pesoEntries.map((e) => e.valor)) : 1;
 
 	if (isLoading || loading) {
 		return (
@@ -149,29 +160,51 @@ export default function EvolucaoPage() {
 
 	return (
 		<div className="min-h-screen bg-[#f8faf8] p-6 md:p-10">
+			<ConfirmDialog
+				open={deleteIndex !== null}
+				onOpenChange={(open) => {
+					if (!open) setDeleteIndex(null);
+				}}
+				title="Excluir medição?"
+				description="Essa ação não pode ser desfeita."
+				onConfirm={handleConfirmDelete}
+			/>
+
 			<div className="mb-8 flex items-center justify-between">
 				<div>
 					<h1 className="text-2xl font-bold text-[#0f1a0f]">Evolução</h1>
-					<p className="text-sm text-[#6a7a6a]">Acompanhe seu progresso corporal</p>
+					<p className="text-sm text-[#6a7a6a]">
+						Acompanhe seu progresso corporal
+					</p>
 				</div>
 				<CreateEvolucaoDialog onCreated={loadData} />
 			</div>
 
 			{pesoEntries.length > 1 && (
 				<div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
-					<h3 className="mb-4 font-semibold text-[#0f1a0f]">Evolução do Peso</h3>
+					<h3 className="mb-4 font-semibold text-[#0f1a0f]">
+						Evolução do Peso
+					</h3>
 					<div className="flex h-48 items-end gap-2">
 						{pesoEntries.map((entry, i) => {
 							const height = (entry.valor / maxPeso) * 100;
 							return (
-								<div key={`${entry.data}-${i}`} className="flex flex-1 flex-col items-center gap-1">
-									<span className="text-xs font-medium text-[#0f1a0f]">{entry.valor}kg</span>
+								<div
+									key={`${entry.data}-${String(i)}`}
+									className="flex flex-1 flex-col items-center gap-1"
+								>
+									<span className="text-xs font-medium text-[#0f1a0f]">
+										{entry.valor}kg
+									</span>
 									<div
 										className="w-full min-w-6 rounded-t-lg bg-green-500 transition-all"
 										style={{ height: `${Math.max(height, 5)}%` }}
 									/>
 									<span className="mt-1 text-[10px] text-[#8a9a8a]">
-										{new Date(entry.data).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+										{new Date(entry.data).toLocaleDateString("pt-BR", {
+											day: "2-digit",
+											month: "2-digit",
+										})}
 									</span>
 								</div>
 							);
@@ -184,13 +217,15 @@ export default function EvolucaoPage() {
 				<div className="flex flex-col items-center justify-center rounded-2xl border bg-white py-16 shadow-sm">
 					<TrendingUp className="size-12 text-[#4a5a4a]/30" />
 					<p className="mt-4 text-[#4a5a4a]">Nenhuma medição registrada</p>
-					<p className="text-sm text-[#8a9a8a]">Clique em "Nova Medição" para começar</p>
+					<p className="text-sm text-[#8a9a8a]">
+						Clique em "Nova Medição" para começar
+					</p>
 				</div>
 			) : (
 				<div className="flex flex-col gap-3">
 					{evolucoes.map((ev, i) => (
 						<div
-							key={`${ev.data}-${i}`}
+							key={`${ev.data}-${String(i)}`}
 							className="flex items-center justify-between rounded-2xl border bg-white p-5 shadow-sm"
 						>
 							<div className="flex items-center gap-4">
@@ -211,7 +246,7 @@ export default function EvolucaoPage() {
 							<Button
 								variant="ghost"
 								size="icon-sm"
-								onClick={() => handleDelete(i)}
+								onClick={() => setDeleteIndex(i)}
 								className="text-red-500 hover:bg-red-50 hover:text-red-600"
 							>
 								<Trash2 className="size-4" />
