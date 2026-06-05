@@ -65,7 +65,8 @@
               "content": "Organize sua rotina fitness de forma prática",
               "textAlign": "center",
               "fontFamily": "Inter",
-              "fontSize": 18
+              "fontSize": 18,
+              "fontWeight": "normal"
             },
             {
               "type": "frame",
@@ -478,7 +479,8 @@
                       "fill": "#4a5a4a",
                       "content": "Planos de Treino",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -513,7 +515,8 @@
                       "fill": "#4a5a4a",
                       "content": "Metas",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -548,7 +551,8 @@
                       "fill": "#4a5a4a",
                       "content": "Evolução",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -583,7 +587,8 @@
                       "fill": "#4a5a4a",
                       "content": "Sugestões",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -1826,7 +1831,8 @@
                       "fill": "#4a5a4a",
                       "content": "Dashboard",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -1897,7 +1903,8 @@
                       "fill": "#4a5a4a",
                       "content": "Metas",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -1932,7 +1939,8 @@
                       "fill": "#4a5a4a",
                       "content": "Evolução",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -1967,7 +1975,8 @@
                       "fill": "#4a5a4a",
                       "content": "Sugestões",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -3740,7 +3749,8 @@
                       "fill": "#4a5a4a",
                       "content": "Dashboard",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -3775,7 +3785,8 @@
                       "fill": "#4a5a4a",
                       "content": "Planos de Treino",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -3846,7 +3857,8 @@
                       "fill": "#4a5a4a",
                       "content": "Evolução",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -3881,7 +3893,8 @@
                       "fill": "#4a5a4a",
                       "content": "Sugestões",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -5490,7 +5503,8 @@
                       "fill": "#4a5a4a",
                       "content": "Dashboard",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -5525,7 +5539,8 @@
                       "fill": "#4a5a4a",
                       "content": "Planos de Treino",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -5560,7 +5575,8 @@
                       "fill": "#4a5a4a",
                       "content": "Metas",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -5631,7 +5647,8 @@
                       "fill": "#4a5a4a",
                       "content": "Sugestões",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -7361,7 +7378,8 @@
                       "fill": "#4a5a4a",
                       "content": "Dashboard",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -7396,7 +7414,8 @@
                       "fill": "#4a5a4a",
                       "content": "Planos de Treino",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -7431,7 +7450,8 @@
                       "fill": "#4a5a4a",
                       "content": "Metas",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -7466,7 +7486,8 @@
                       "fill": "#4a5a4a",
                       "content": "Evolução",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -9095,6 +9116,362 @@
                               ]
                             }
                           ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "hwqki",
+      "x": 9120,
+      "y": 0,
+      "name": "FitPlanner - Landing Page",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "#FFFFFF",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Fv3xX",
+          "name": "Navbar",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "padding": [
+            16,
+            60
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "aY63Q",
+              "name": "Nav Logo",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ExMc5",
+                  "name": "Nav Logo Emoji",
+                  "fill": "#16A34A",
+                  "content": "💪",
+                  "fontFamily": "Inter",
+                  "fontSize": 28,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "G8XGqQ",
+                  "name": "Nav Logo Text",
+                  "fill": "#111827",
+                  "content": "FitPlanner",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "eH8dy",
+              "name": "Nav Links",
+              "gap": 32,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "q1As3",
+                  "name": "Nav Link - Funcionalidades",
+                  "fill": "#374151",
+                  "content": "Funcionalidades",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "JNVTA",
+                  "name": "Nav Link - Como Funciona",
+                  "fill": "#374151",
+                  "content": "Como Funciona",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "m34xVv",
+                  "name": "Nav Link - Sobre",
+                  "fill": "#374151",
+                  "content": "Sobre",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "MkVLQ",
+              "name": "Nav CTA",
+              "fill": "#16A34A",
+              "cornerRadius": 8,
+              "padding": [
+                10,
+                20
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "yrYDt",
+                  "name": "Nav CTA Text",
+                  "fill": "#FFFFFF",
+                  "content": "Começar Agora",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Ka1x2",
+          "name": "Hero Section",
+          "width": "fill_container",
+          "height": "fill_container",
+          "fill": "#F0FDF4",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            80,
+            60
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "oRspG",
+              "name": "Hero Content",
+              "width": 800,
+              "layout": "vertical",
+              "gap": 20,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "qboHk",
+                  "name": "Badge",
+                  "fill": "#DCFCE7",
+                  "cornerRadius": 20,
+                  "padding": [
+                    6,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "tv7sx",
+                      "name": "Badge Text",
+                      "fill": "#15803D",
+                      "content": "Seu assistente fitness pessoal",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "RU6qw",
+                  "name": "Hero Title",
+                  "fill": "#111827",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Organize sua rotina\nde treinos e metas",
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 56,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "r6WlN1",
+                  "name": "Hero Subtitle",
+                  "fill": "#4B5563",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "O FitPlanner ajuda você a planejar treinos, acompanhar evolução e alcançar seus objetivos fitness de forma simples e organizada.",
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "oaH3t",
+                  "name": "Hero Buttons",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "W2NPvy",
+                      "name": "Primary Button",
+                      "fill": "#16A34A",
+                      "cornerRadius": 10,
+                      "gap": 8,
+                      "padding": [
+                        14,
+                        28
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "CE2yD",
+                          "name": "Primary Btn Text",
+                          "fill": "#FFFFFF",
+                          "content": "Começar Gratis",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "NLaW1",
+                      "name": "Secondary Button",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 10,
+                      "stroke": "#d0dcd0",
+                      "strokeWidth": 1,
+                      "gap": 8,
+                      "padding": [
+                        14,
+                        28
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ypgcd",
+                          "name": "Secondary Btn Text",
+                          "fill": "#111827",
+                          "content": "Saiba Mais",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "CiYEf",
+                  "name": "Hero Stats",
+                  "gap": 48,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "kyjEX",
+                      "name": "Stat Item - Treinos criados",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "qtgGF",
+                          "name": "Stat Value",
+                          "fill": "#16A34A",
+                          "content": "500+",
+                          "fontFamily": "Inter",
+                          "fontSize": 28,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "k3phh",
+                          "name": "Stat Label",
+                          "fill": "#6B7280",
+                          "content": "Treinos criados",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "FJOsj",
+                      "name": "Stat Item - Exercícios",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "J5ktRA",
+                          "name": "Stat Value",
+                          "fill": "#16A34A",
+                          "content": "50+",
+                          "fontFamily": "Inter",
+                          "fontSize": 28,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "zNazJ",
+                          "name": "Stat Label",
+                          "fill": "#6B7280",
+                          "content": "Exercícios",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cxDK8",
+                      "name": "Stat Item - Gratuito",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "mhuAZ",
+                          "name": "Stat Value",
+                          "fill": "#16A34A",
+                          "content": "100%",
+                          "fontFamily": "Inter",
+                          "fontSize": 28,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "g60uO6",
+                          "name": "Stat Label",
+                          "fill": "#6B7280",
+                          "content": "Gratuito",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
