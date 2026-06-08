@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	Bot,
 	Dumbbell,
 	LayoutDashboard,
 	Lightbulb,
@@ -11,7 +12,7 @@ import {
 	TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import useAuth from "@/app/login/auth-context";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -32,6 +33,7 @@ const navItems = [
 	{ label: "Metas", href: "/dashboard/metas", icon: Target },
 	{ label: "Evolução", href: "/dashboard/evolucao", icon: TrendingUp },
 	{ label: "Sugestões", href: "/dashboard/sugestoes", icon: Lightbulb },
+	{ label: "Assistente IA", href: "/dashboard/assistente", icon: Bot },
 ];
 
 function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
@@ -119,7 +121,6 @@ function LogoutButton() {
 
 function MobileSidebar() {
 	const [open, setOpen] = useState(false);
-	const router = useRouter();
 	return (
 		<header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-[#e8f0e8] bg-white px-4 md:hidden">
 			<Sheet open={open} onOpenChange={setOpen}>

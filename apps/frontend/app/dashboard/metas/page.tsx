@@ -1,7 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Plus, Target, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 import useAuth, { type Meta } from "@/app/login/auth-context";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -13,30 +16,43 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+const metaSchema = z.object({
+	descricao: z
+		.string()
+		.min(1, "A descrição é obrigatória.")
+		.max(128, "A descrição pode ter no máximo 128 caracteres."),
+	prazo: z.string(),
+	status: z.string(),
+});
+
+type MetaFormData = z.infer<typeof metaSchema>;
 
 function CreateMetaDialog({ onCreated }: { onCreated: () => void }) {
 	const [open, setOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const { createMeta } = useAuth();
-	const [form, setForm] = useState({
-		descricao: "",
-		prazo: "",
-		status: "Em andamento",
+	const { control, handleSubmit, reset } = useForm<MetaFormData>({
+		resolver: zodResolver(metaSchema as any),
+		defaultValues: {
+			descricao: "",
+			prazo: "",
+			status: "Em andamento",
+		},
 	});
 
-	async function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-		if (!form.descricao.trim()) return;
+	async function onSubmit(data: MetaFormData) {
 		setLoading(true);
 		try {
 			await createMeta({
-				descricao: form.descricao,
-				prazo: form.prazo ? Number(form.prazo) : null,
-				status: form.status || null,
+				descricao: data.descricao,
+				prazo: data.prazo ? Number(data.prazo) : null,
+				status: data.status || null,
 			});
-			setForm({ descricao: "", prazo: "", status: "Em andamento" });
+			reset();
 			setOpen(false);
 			onCreated();
 		} catch (err) {
@@ -47,7 +63,13 @@ function CreateMetaDialog({ onCreated }: { onCreated: () => void }) {
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog
+			open={open}
+			onOpenChange={(v) => {
+				setOpen(v);
+				if (!v) reset();
+			}}
+		>
 			<DialogTrigger asChild>
 				<Button size="sm" className="gap-1.5">
 					<Plus className="size-4" />
@@ -57,39 +79,63 @@ function CreateMetaDialog({ onCreated }: { onCreated: () => void }) {
 			<DialogContent>
 				<DialogTitle>Nova Meta</DialogTitle>
 				<DialogDescription>Defina um objetivo para alcançar</DialogDescription>
-				<form onSubmit={handleSubmit} className="flex flex-col gap-4">
+				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="descricao">Descrição *</Label>
-						<Input
-							id="descricao"
-							value={form.descricao}
-							onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-							placeholder="Ex: Perder 5kg"
-							required
+						<Controller
+							name="descricao"
+							control={control}
+							render={({ field, fieldState }) => (
+								<>
+									<Label htmlFor="descricao">Descrição *</Label>
+									<Input
+										id="descricao"
+										placeholder="Ex: Perder 5kg"
+										{...field}
+									/>
+									{fieldState.invalid && (
+										<FieldError errors={[fieldState.error]} />
+									)}
+								</>
+							)}
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="prazo">Prazo (dias)</Label>
-						<Input
-							id="prazo"
-							type="number"
-							value={form.prazo}
-							onChange={(e) => setForm({ ...form, prazo: e.target.value })}
-							placeholder="Ex: 30"
+						<Controller
+							name="prazo"
+							control={control}
+							render={({ field }) => (
+								<>
+									<Label htmlFor="prazo">Prazo (dias)</Label>
+									<Input
+										id="prazo"
+										type="number"
+										placeholder="Ex: 30"
+										{...field}
+									/>
+								</>
+							)}
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="status">Status</Label>
-						<select
-							id="status"
-							value={form.status}
-							onChange={(e) => setForm({ ...form, status: e.target.value })}
-							className="flex h-9 w-full rounded-lg border border-[#e8f0e8] bg-white px-3 text-sm text-[#0f1a0f] outline-none focus:border-green-600 focus:ring-2 focus:ring-green-600/20"
-						>
-							<option value="Em andamento">Em andamento</option>
-							<option value="Concluída">Concluída</option>
-							<option value="Pendente">Pendente</option>
-						</select>
+						<Controller
+							name="status"
+							control={control}
+							render={({ field }) => (
+								<>
+									<Label htmlFor="status">Status</Label>
+									<select
+										id="status"
+										value={field.value}
+										onChange={field.onChange}
+										className="flex h-9 w-full rounded-lg border border-[#e8f0e8] bg-white px-3 text-sm text-[#0f1a0f] outline-none focus:border-green-600 focus:ring-2 focus:ring-green-600/20"
+									>
+										<option value="Em andamento">Em andamento</option>
+										<option value="Concluída">Concluída</option>
+										<option value="Pendente">Pendente</option>
+									</select>
+								</>
+							)}
+						/>
 					</div>
 					<Button type="submit" disabled={loading} className="mt-2 gap-1.5">
 						{loading && <LoaderCircle className="size-4 animate-spin" />}

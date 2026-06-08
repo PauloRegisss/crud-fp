@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
 import os
 import datetime as dt
 from dotenv import load_dotenv
@@ -255,14 +254,16 @@ async def post_treino(usuario: str, data: dict = Body(...)):
     treinos = load_treinos(usuario)
     if any(t["nome"].lower() == data["nome"].lower() for t in treinos):
         raise HTTPException(status_code=409, detail="Já existe um treino com esse nome")
-    treinos.append({
-        "nome":     data.get("nome", ""),
-        "tipo":     data.get("tipo", ""),
-        "data":     data.get("data", ""),
-        "duracao":  data.get("duracao", ""),
-        "objetivo": data.get("objetivo", ""),
-        "meta":     data.get("meta", "")
-    })
+    treinos.append(
+        {
+            "nome": data.get("nome", ""),
+            "tipo": data.get("tipo", ""),
+            "data": data.get("data", ""),
+            "duracao": data.get("duracao", ""),
+            "objetivo": data.get("objetivo", ""),
+            "meta": data.get("meta", ""),
+        }
+    )
     save_treinos(usuario, treinos)
     return {"ok": True}
 
@@ -315,20 +316,24 @@ async def post_exercicios(usuario: str, data: dict = Body(...)):
         raise HTTPException(status_code=400, detail="Nome obrigatório")
     exercicios = load_exercicios(usuario)
     if any(
-        e["nome"].lower() == data["nome"].lower() and
-        e["treinos"].lower() == data.get["treinos", ""].lower()
+        e["nome"].lower() == data["nome"].lower()
+        and e["treinos"].lower() == data.get["treinos", ""].lower()
         for e in exercicios
     ):
-        raise HTTPException(status_code=409, detail="Já existe um exercício com esse nome nesse treino")
-    exercicios.append({
-        "nome":       data.get("nome", ""),
-        "treino":     data.get("treino", ""),
-        "modo":       data.get("modo", "series"),
-        "series":     str(data.get("series", 0)),
-        "repeticoes": str(data.get("repeticoes", 0)),
-        "tempo":      str(data.get("tempo", 0)),
-        "distancia":  str(data.get("distancia", 0))
-    })
+        raise HTTPException(
+            status_code=409, detail="Já existe um exercício com esse nome nesse treino"
+        )
+    exercicios.append(
+        {
+            "nome": data.get("nome", ""),
+            "treino": data.get("treino", ""),
+            "modo": data.get("modo", "series"),
+            "series": str(data.get("series", 0)),
+            "repeticoes": str(data.get("repeticoes", 0)),
+            "tempo": str(data.get("tempo", 0)),
+            "distancia": str(data.get("distancia", 0)),
+        }
+    )
     save_exercicios(usuario, exercicios)
     return {"ok": True}
 
@@ -379,12 +384,16 @@ async def post_metas(usuario: str, data: dict = Body(...)):
         raise HTTPException(status_code=400, detail="Descrição obrigatória")
     metas = load_metas(usuario)
     if any(m["descricao"].lower() == data["descricao"].lower() for m in metas):
-        raise HTTPException(status_code=409, detail="Já existe uma meta com essa descrição")
-    metas.append({
-        "descricao": data.get("descricao", ""),
-        "prazo":     data.get("prazo", ""),
-        "status":    data.get("status", "Em andamento")
-    })
+        raise HTTPException(
+            status_code=409, detail="Já existe uma meta com essa descrição"
+        )
+    metas.append(
+        {
+            "descricao": data.get("descricao", ""),
+            "prazo": data.get("prazo", ""),
+            "status": data.get("status", "Em andamento"),
+        }
+    )
     save_metas(usuario, metas)
     return {"ok": True}
 
@@ -427,13 +436,17 @@ async def post_evolucoes(usuario: str, data: dict = Body(...)):
         raise HTTPException(status_code=400, detail="Data obrigatória")
     evolucoes = load_evolucoes(usuario)
     if any(e["data"] == data["data"] for e in evolucoes):
-        raise HTTPException(status_code=409, detail="Já existe um registro de evolução nessa data")
-    evolucoes.append({
-        "data":    data.get("data", ""),
-        "peso":    data.get("peso", ""),
-        "altura":  data.get("altura", ""),
-        "gordura": data.get("gordura", "")
-    })
+        raise HTTPException(
+            status_code=409, detail="Já existe um registro de evolução nessa data"
+        )
+    evolucoes.append(
+        {
+            "data": data.get("data", ""),
+            "peso": data.get("peso", ""),
+            "altura": data.get("altura", ""),
+            "gordura": data.get("gordura", ""),
+        }
+    )
     save_evolucoes(usuario, evolucoes)
     return {"ok": True}
 
@@ -613,6 +626,15 @@ async def agente(usuario: str, data: dict = Body(...)):
     message = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=1024,
+        system=(
+            "Você é um personal trainer virtual especializado em fitness, "
+            "musculação, nutrição esportiva e saúde física. Responda APENAS "
+            "perguntas relacionadas a esses temas. Se o usuário perguntar sobre "
+            "qualquer assunto fora desse escopo, recuse educadamente e redirecione "
+            "para temas fitness. Responda sempre em português brasileiro. "
+            "Use os dados do usuário fornecidos no contexto para personalizar "
+            "suas respostas quando possível."
+        ),
         messages=[
             {
                 "role": "user",
@@ -622,23 +644,3 @@ async def agente(usuario: str, data: dict = Body(...)):
     )
     resposta = message.content[0].text
     return {"resposta": resposta}
-
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-        title="Custom title",
-        version="2.5.0",
-        summary="This is a very custom OpenAPI schema",
-        description="Here's a longer description of the custom **OpenAPI** schema",
-        routes=app.routes,
-    )
-    openapi_schema["info"]["x-logo"] = {
-        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
-    }
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-
-app.openapi = custom_openapi
