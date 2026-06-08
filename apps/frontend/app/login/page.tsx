@@ -1,8 +1,9 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ChevronLeft, Dumbbell } from "lucide-react";
+import { Check, ChevronLeft, Dumbbell, LoaderCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -18,23 +19,38 @@ const features = [
 ];
 
 const userSchema = z.object({
-	name: z
+	nome: z
 		.string()
-		.min(5, "O nome precisa ter no mínimo 5 caracteres.")
+		.min(3, "O nome precisa ter no mínimo 3 caracteres.")
 		.max(32, "O nome pode ter no máximo 32 caracteres."),
 });
 
 export default function LoginPage() {
+	const [loginIsLoading, setLoginFunction] = useTransition();
 	const form = useForm<z.infer<typeof userSchema>>({
 		resolver: zodResolver(userSchema),
 		defaultValues: {
-			name: "",
+			nome: "",
 		},
 	});
 	const router = useRouter();
-	function onSubmit(data: z.infer<typeof userSchema>) {
-		localStorage.setItem("auth_info", JSON.stringify({ name: data.name }));
-		router.push("/dashboard");
+	async function onSubmit(data: z.infer<typeof userSchema>) {
+		setLoginFunction(async () => {
+			const login = await fetch("http://localhost:8000/login", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+			});
+			const json = await login.json();
+			if (login.ok) {
+				localStorage.setItem("auth_info", JSON.stringify({ name: data.nome }));
+				router.push("/dashboard");
+			} else {
+				console.error(json);
+			}
+		});
 	}
 	return (
 		<div className="flex min-h-screen">
@@ -87,7 +103,7 @@ export default function LoginPage() {
 						>
 							<div className="flex flex-col gap-2">
 								<Controller
-									name="name"
+									name="nome"
 									control={form.control}
 									render={({ field, fieldState }) => (
 										<>
@@ -113,8 +129,13 @@ export default function LoginPage() {
 							<Button
 								className="h-12 w-full rounded-xl bg-primary text-base font-semibold shadow-lg shadow-primary/30"
 								type="submit"
+								disabled={loginIsLoading}
 							>
-								Começar Minha Jornada
+								{loginIsLoading ? (
+									<LoaderCircleIcon className="animate-spin" />
+								) : (
+									"Começar Minha Jornada"
+								)}
 							</Button>
 
 							<p className="text-center text-xs text-muted-foreground">
