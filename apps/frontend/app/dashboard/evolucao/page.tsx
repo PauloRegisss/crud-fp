@@ -1,7 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Plus, Trash2, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 import useAuth, { type Evolucao } from "@/app/login/auth-context";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -12,32 +15,43 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+const evolucaoSchema = z.object({
+	data: z.string().min(1, "A data é obrigatória."),
+	peso: z.string(),
+	altura: z.string(),
+	gordura: z.string(),
+});
+
+type EvolucaoFormData = z.infer<typeof evolucaoSchema>;
 
 function CreateEvolucaoDialog({ onCreated }: { onCreated: () => void }) {
 	const [open, setOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const { createEvolucao } = useAuth();
-	const [form, setForm] = useState({
-		data: "",
-		peso: "",
-		altura: "",
-		gordura: "",
+	const { control, handleSubmit, reset } = useForm<EvolucaoFormData>({
+		resolver: zodResolver(evolucaoSchema as any),
+		defaultValues: {
+			data: "",
+			peso: "",
+			altura: "",
+			gordura: "",
+		},
 	});
 
-	async function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-		if (!form.data) return;
+	async function onSubmit(data: EvolucaoFormData) {
 		setLoading(true);
 		try {
 			await createEvolucao({
-				data: form.data,
-				peso: form.peso || null,
-				altura: form.altura || null,
-				gordura: form.gordura || null,
+				data: data.data,
+				peso: data.peso || null,
+				altura: data.altura || null,
+				gordura: data.gordura || null,
 			});
-			setForm({ data: "", peso: "", altura: "", gordura: "" });
+			reset();
 			setOpen(false);
 			onCreated();
 		} catch (err) {
@@ -48,7 +62,13 @@ function CreateEvolucaoDialog({ onCreated }: { onCreated: () => void }) {
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog
+			open={open}
+			onOpenChange={(v) => {
+				setOpen(v);
+				if (!v) reset();
+			}}
+		>
 			<DialogTrigger asChild>
 				<Button size="sm" className="gap-1.5">
 					<Plus className="size-4" />
@@ -58,49 +78,75 @@ function CreateEvolucaoDialog({ onCreated }: { onCreated: () => void }) {
 			<DialogContent>
 				<DialogTitle>Nova Medição</DialogTitle>
 				<DialogDescription>Registre seus dados corporais</DialogDescription>
-				<form onSubmit={handleSubmit} className="flex flex-col gap-4">
+				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="data">Data *</Label>
-						<Input
-							id="data"
-							type="date"
-							value={form.data}
-							onChange={(e) => setForm({ ...form, data: e.target.value })}
-							required
+						<Controller
+							name="data"
+							control={control}
+							render={({ field, fieldState }) => (
+								<>
+									<Label htmlFor="data">Data *</Label>
+									<Input id="data" type="date" {...field} />
+									{fieldState.invalid && (
+										<FieldError errors={[fieldState.error]} />
+									)}
+								</>
+							)}
 						/>
 					</div>
 					<div className="grid grid-cols-3 gap-3">
 						<div className="flex flex-col gap-1.5">
-							<Label htmlFor="peso">Peso (kg)</Label>
-							<Input
-								id="peso"
-								type="number"
-								step="0.1"
-								value={form.peso}
-								onChange={(e) => setForm({ ...form, peso: e.target.value })}
-								placeholder="75.5"
+							<Controller
+								name="peso"
+								control={control}
+								render={({ field }) => (
+									<>
+										<Label htmlFor="peso">Peso (kg)</Label>
+										<Input
+											id="peso"
+											type="number"
+											step="0.1"
+											placeholder="75.5"
+											{...field}
+										/>
+									</>
+								)}
 							/>
 						</div>
 						<div className="flex flex-col gap-1.5">
-							<Label htmlFor="altura">Altura (m)</Label>
-							<Input
-								id="altura"
-								type="number"
-								step="0.01"
-								value={form.altura}
-								onChange={(e) => setForm({ ...form, altura: e.target.value })}
-								placeholder="1.75"
+							<Controller
+								name="altura"
+								control={control}
+								render={({ field }) => (
+									<>
+										<Label htmlFor="altura">Altura (m)</Label>
+										<Input
+											id="altura"
+											type="number"
+											step="0.01"
+											placeholder="1.75"
+											{...field}
+										/>
+									</>
+								)}
 							/>
 						</div>
 						<div className="flex flex-col gap-1.5">
-							<Label htmlFor="gordura">Gordura (%)</Label>
-							<Input
-								id="gordura"
-								type="number"
-								step="0.1"
-								value={form.gordura}
-								onChange={(e) => setForm({ ...form, gordura: e.target.value })}
-								placeholder="18.5"
+							<Controller
+								name="gordura"
+								control={control}
+								render={({ field }) => (
+									<>
+										<Label htmlFor="gordura">Gordura (%)</Label>
+										<Input
+											id="gordura"
+											type="number"
+											step="0.1"
+											placeholder="18.5"
+											{...field}
+										/>
+									</>
+								)}
 							/>
 						</div>
 					</div>

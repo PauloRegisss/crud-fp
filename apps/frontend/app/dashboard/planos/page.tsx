@@ -1,5 +1,6 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	ChevronDown,
 	ChevronUp,
@@ -9,6 +10,8 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 import useAuth, { type Exercicio, type Treino } from "@/app/login/auth-context";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -20,43 +23,52 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+const treinoSchema = z.object({
+	nome: z
+		.string()
+		.min(1, "O nome é obrigatório.")
+		.max(64, "O nome pode ter no máximo 64 caracteres."),
+	tipo: z.string(),
+	data: z.string(),
+	duracao: z.string(),
+	objetivo: z.string(),
+	meta: z.string(),
+});
+
+type TreinoFormData = z.infer<typeof treinoSchema>;
 
 function CreateTreinoDialog({ onCreated }: { onCreated: () => void }) {
 	const [open, setOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const { createTreino } = useAuth();
-	const [form, setForm] = useState({
-		nome: "",
-		tipo: "",
-		data: "",
-		duracao: "",
-		objetivo: "",
-		meta: "",
+	const { control, handleSubmit, reset } = useForm<TreinoFormData>({
+		resolver: zodResolver(treinoSchema as any),
+		defaultValues: {
+			nome: "",
+			tipo: "",
+			data: "",
+			duracao: "",
+			objetivo: "",
+			meta: "",
+		},
 	});
 
-	async function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-		if (!form.nome.trim()) return;
+	async function onSubmit(data: TreinoFormData) {
 		setLoading(true);
 		try {
 			await createTreino({
-				nome: form.nome,
-				tipo: form.tipo || null,
-				data: form.data || null,
-				duracao: form.duracao || null,
-				objetivo: form.objetivo || null,
-				meta: form.meta || null,
+				nome: data.nome,
+				tipo: data.tipo || null,
+				data: data.data || null,
+				duracao: data.duracao || null,
+				objetivo: data.objetivo || null,
+				meta: data.meta || null,
 			});
-			setForm({
-				nome: "",
-				tipo: "",
-				data: "",
-				duracao: "",
-				objetivo: "",
-				meta: "",
-			});
+			reset();
 			setOpen(false);
 			onCreated();
 		} catch (err) {
@@ -67,7 +79,13 @@ function CreateTreinoDialog({ onCreated }: { onCreated: () => void }) {
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog
+			open={open}
+			onOpenChange={(v) => {
+				setOpen(v);
+				if (!v) reset();
+			}}
+		>
 			<DialogTrigger asChild>
 				<Button size="sm" className="gap-1.5">
 					<Plus className="size-4" />
@@ -77,62 +95,90 @@ function CreateTreinoDialog({ onCreated }: { onCreated: () => void }) {
 			<DialogContent>
 				<DialogTitle>Novo Treino</DialogTitle>
 				<DialogDescription>Preencha os dados do treino</DialogDescription>
-				<form onSubmit={handleSubmit} className="flex flex-col gap-4">
+				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="nome">Nome *</Label>
-						<Input
-							id="nome"
-							value={form.nome}
-							onChange={(e) => setForm({ ...form, nome: e.target.value })}
-							placeholder="Ex: Treino A"
-							required
+						<Controller
+							name="nome"
+							control={control}
+							render={({ field, fieldState }) => (
+								<>
+									<Label htmlFor="nome">Nome *</Label>
+									<Input id="nome" placeholder="Ex: Treino A" {...field} />
+									{fieldState.invalid && (
+										<FieldError errors={[fieldState.error]} />
+									)}
+								</>
+							)}
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="tipo">Tipo</Label>
-						<Input
-							id="tipo"
-							value={form.tipo}
-							onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-							placeholder="Ex: Força, Cardio"
+						<Controller
+							name="tipo"
+							control={control}
+							render={({ field }) => (
+								<>
+									<Label htmlFor="tipo">Tipo</Label>
+									<Input id="tipo" placeholder="Ex: Força, Cardio" {...field} />
+								</>
+							)}
 						/>
 					</div>
 					<div className="grid grid-cols-2 gap-3">
 						<div className="flex flex-col gap-1.5">
-							<Label htmlFor="data">Data</Label>
-							<Input
-								id="data"
-								type="date"
-								value={form.data}
-								onChange={(e) => setForm({ ...form, data: e.target.value })}
+							<Controller
+								name="data"
+								control={control}
+								render={({ field }) => (
+									<>
+										<Label htmlFor="data">Data</Label>
+										<Input id="data" type="date" {...field} />
+									</>
+								)}
 							/>
 						</div>
 						<div className="flex flex-col gap-1.5">
-							<Label htmlFor="duracao">Duração</Label>
-							<Input
-								id="duracao"
-								value={form.duracao}
-								onChange={(e) => setForm({ ...form, duracao: e.target.value })}
-								placeholder="Ex: 60 min"
+							<Controller
+								name="duracao"
+								control={control}
+								render={({ field }) => (
+									<>
+										<Label htmlFor="duracao">Duração</Label>
+										<Input id="duracao" placeholder="Ex: 60 min" {...field} />
+									</>
+								)}
 							/>
 						</div>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="objetivo">Objetivo</Label>
-						<Input
-							id="objetivo"
-							value={form.objetivo}
-							onChange={(e) => setForm({ ...form, objetivo: e.target.value })}
-							placeholder="Ex: Hipertrofia"
+						<Controller
+							name="objetivo"
+							control={control}
+							render={({ field }) => (
+								<>
+									<Label htmlFor="objetivo">Objetivo</Label>
+									<Input
+										id="objetivo"
+										placeholder="Ex: Hipertrofia"
+										{...field}
+									/>
+								</>
+							)}
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="meta">Meta</Label>
-						<Input
-							id="meta"
-							value={form.meta}
-							onChange={(e) => setForm({ ...form, meta: e.target.value })}
-							placeholder="Ex: Aumentar massa muscular"
+						<Controller
+							name="meta"
+							control={control}
+							render={({ field }) => (
+								<>
+									<Label htmlFor="meta">Meta</Label>
+									<Input
+										id="meta"
+										placeholder="Ex: Aumentar massa muscular"
+										{...field}
+									/>
+								</>
+							)}
 						/>
 					</div>
 					<Button type="submit" disabled={loading} className="mt-2 gap-1.5">
@@ -145,6 +191,17 @@ function CreateTreinoDialog({ onCreated }: { onCreated: () => void }) {
 	);
 }
 
+const exercicioSchema = z.object({
+	nome: z
+		.string()
+		.min(1, "O nome é obrigatório.")
+		.max(64, "O nome pode ter no máximo 64 caracteres."),
+	series: z.string(),
+	repeticoes: z.string(),
+});
+
+type ExercicioFormData = z.infer<typeof exercicioSchema>;
+
 function AddExercicioForm({
 	treinoNome,
 	onAdded,
@@ -154,37 +211,28 @@ function AddExercicioForm({
 }) {
 	const { createExercicio } = useAuth();
 	const [loading, setLoading] = useState(false);
-	const [form, setForm] = useState({
-		nome: "",
-		modo: "series",
-		series: "",
-		repeticoes: "",
-		tempo: "",
-		distancia: "",
+	const { control, handleSubmit, reset } = useForm<ExercicioFormData>({
+		resolver: zodResolver(exercicioSchema as any),
+		defaultValues: {
+			nome: "",
+			series: "",
+			repeticoes: "",
+		},
 	});
 
-	async function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-		if (!form.nome.trim()) return;
+	async function onSubmit(data: ExercicioFormData) {
 		setLoading(true);
 		try {
 			await createExercicio({
-				nome: form.nome,
+				nome: data.nome,
 				treino: treinoNome,
-				modo: form.modo || null,
-				series: form.series || null,
-				repeticoes: form.repeticoes || null,
-				tempo: form.tempo || null,
-				distancia: form.distancia || null,
+				modo: null,
+				series: data.series || null,
+				repeticoes: data.repeticoes || null,
+				tempo: null,
+				distancia: null,
 			});
-			setForm({
-				nome: "",
-				modo: "series",
-				series: "",
-				repeticoes: "",
-				tempo: "",
-				distancia: "",
-			});
+			reset();
 			onAdded();
 		} catch (err) {
 			console.error(err);
@@ -195,31 +243,44 @@ function AddExercicioForm({
 
 	return (
 		<form
-			onSubmit={handleSubmit}
+			onSubmit={handleSubmit(onSubmit)}
 			className="flex flex-col gap-3 rounded-lg border border-dashed border-[#e8f0e8] p-4"
 		>
 			<p className="text-xs font-medium text-[#4a5a4a]">Adicionar exercício</p>
 			<div className="flex flex-col gap-1.5">
-				<Input
-					value={form.nome}
-					onChange={(e) => setForm({ ...form, nome: e.target.value })}
-					placeholder="Nome do exercício"
-					required
-					className="h-8 text-sm"
+				<Controller
+					name="nome"
+					control={control}
+					render={({ field, fieldState }) => (
+						<>
+							<Input
+								placeholder="Nome do exercício"
+								className="h-8 text-sm"
+								{...field}
+							/>
+							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+						</>
+					)}
 				/>
 			</div>
 			<div className="grid grid-cols-2 gap-2">
-				<Input
-					value={form.series}
-					onChange={(e) => setForm({ ...form, series: e.target.value })}
-					placeholder="Séries"
-					className="h-8 text-sm"
+				<Controller
+					name="series"
+					control={control}
+					render={({ field }) => (
+						<Input placeholder="Séries" className="h-8 text-sm" {...field} />
+					)}
 				/>
-				<Input
-					value={form.repeticoes}
-					onChange={(e) => setForm({ ...form, repeticoes: e.target.value })}
-					placeholder="Repetições"
-					className="h-8 text-sm"
+				<Controller
+					name="repeticoes"
+					control={control}
+					render={({ field }) => (
+						<Input
+							placeholder="Repetições"
+							className="h-8 text-sm"
+							{...field}
+						/>
+					)}
 				/>
 			</div>
 			<Button
@@ -259,7 +320,7 @@ export default function PlanosPage() {
 		name?: string;
 		index?: number;
 	} | null>(null);
-	const [deleting, setDeleting] = useState(false);
+	const [, setDeleting] = useState(false);
 
 	async function loadData() {
 		try {

@@ -41,6 +41,10 @@ export interface SugestaoResponse {
 	dados: Treino[];
 }
 
+export interface AgenteResponse {
+	resposta: string;
+}
+
 function stripNulls(obj: Record<string, unknown>): Record<string, unknown> {
 	const out: Record<string, unknown> = {};
 	for (const [key, value] of Object.entries(obj)) {
@@ -55,7 +59,9 @@ function stripNulls(obj: Record<string, unknown>): Record<string, unknown> {
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 	const body = options?.body as string | undefined;
-	const processedBody = body ? JSON.stringify(stripNulls(JSON.parse(body))) : undefined;
+	const processedBody = body
+		? JSON.stringify(stripNulls(JSON.parse(body)))
+		: undefined;
 	const res = await fetch(`${API_URL}${path}`, {
 		...options,
 		body: processedBody,
@@ -77,8 +83,7 @@ export const api = {
 			body: JSON.stringify({ nome }),
 		}),
 
-	getTreinos: (usuario: string) =>
-		apiFetch<Treino[]>(`/treinos/${usuario}`),
+	getTreinos: (usuario: string) => apiFetch<Treino[]>(`/treinos/${usuario}`),
 
 	createTreino: (usuario: string, data: Partial<Treino>) =>
 		apiFetch<{ ok: boolean }>(`/treinos/${usuario}`, {
@@ -87,15 +92,21 @@ export const api = {
 		}),
 
 	updateTreino: (usuario: string, nome: string, data: Partial<Treino>) =>
-		apiFetch<{ ok: boolean }>(`/treinos/${usuario}/${encodeURIComponent(nome)}`, {
-			method: "PUT",
-			body: JSON.stringify(data),
-		}),
+		apiFetch<{ ok: boolean }>(
+			`/treinos/${usuario}/${encodeURIComponent(nome)}`,
+			{
+				method: "PUT",
+				body: JSON.stringify(data),
+			},
+		),
 
 	deleteTreino: (usuario: string, nome: string) =>
-		apiFetch<{ ok: boolean }>(`/treinos/${usuario}/${encodeURIComponent(nome)}`, {
-			method: "DELETE",
-		}),
+		apiFetch<{ ok: boolean }>(
+			`/treinos/${usuario}/${encodeURIComponent(nome)}`,
+			{
+				method: "DELETE",
+			},
+		),
 
 	getExercicios: (usuario: string, treino?: string) => {
 		const params = treino ? `?treino=${encodeURIComponent(treino)}` : "";
@@ -119,8 +130,7 @@ export const api = {
 			method: "DELETE",
 		}),
 
-	getMetas: (usuario: string) =>
-		apiFetch<Meta[]>(`/metas/${usuario}`),
+	getMetas: (usuario: string) => apiFetch<Meta[]>(`/metas/${usuario}`),
 
 	createMeta: (usuario: string, data: Partial<Meta>) =>
 		apiFetch<{ ok: boolean }>(`/metas/${usuario}`, {
@@ -163,4 +173,10 @@ export const api = {
 		const params = objetivo ? `?objetivo=${encodeURIComponent(objetivo)}` : "";
 		return apiFetch<SugestaoResponse>(`/sugestoes/${usuario}${params}`);
 	},
+
+	postAgente: (usuario: string, pergunta: string) =>
+		apiFetch<AgenteResponse>(`/agente/${usuario}`, {
+			method: "POST",
+			body: JSON.stringify({ pergunta }),
+		}),
 };
