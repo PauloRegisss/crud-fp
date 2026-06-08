@@ -565,17 +565,21 @@ SUGESTOES_PADRAO = {
 }
 
 def loaded_sugestoes(usuario: str, objetivo: str = None):
-    lista_treinos = load_treinos(usuario)
+    hoje = dt.date.today().strftime("%d/%m/%Y")
 
-    if lista_treinos:
-        return {"origem": "arquivo", "dados": lista_treinos}
+    if objetivo and objetivo in SUGESTOES_PADRAO:
+        dados = [s.copy() for s in SUGESTOES_PADRAO[objetivo]]
+        for s in dados:
+            s["data"] = s.get("data") or hoje
+        return {"origem": "sugestao", "dados": dados}
 
-    if objetivo in SUGESTOES_PADRAO:
-        sugestao = random.choice(SUGESTOES_PADRAO[objetivo]).copy()
-        sugestao["data"] = dt.date.today().strftime("%d/%m/%Y")
-        return {"origem": "sugestao", "dados": [sugestao]}
-
-    return {"origem": "nenhum", "dados": []}
+    todas = []
+    for cat, lista in SUGESTOES_PADRAO.items():
+        for s in lista:
+            item = s.copy()
+            item["data"] = item.get("data") or hoje
+            todas.append(item)
+    return {"origem": "sugestao", "dados": todas}
 
 @app.get("/sugestoes/{usuario}")
 async def get_sugestoes(usuario: str, objetivo: str = None):
