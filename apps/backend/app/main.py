@@ -220,6 +220,8 @@ async def post_treino(usuario: str, data: dict = Body(...)):
     if not data.get("nome"):
         raise HTTPException(status_code=400, detail="Nome obrigatório")
     treinos = load_treinos(usuario)
+    if any(t["nome"].lower() == data["nome"].lower() for t in treinos):
+        raise HTTPException(status_code=409, detail="Já existe um treino com esse nome")
     treinos.append({
         "nome":     data.get("nome", ""),
         "tipo":     data.get("tipo", ""),
@@ -275,6 +277,12 @@ async def post_exercicios(usuario: str, data: dict = Body(...)):
     if not data.get("nome"):
         raise HTTPException(status_code=400, detail="Nome obrigatório")
     exercicios = load_exercicios(usuario)
+    if any(
+        e["nome"].lower() == data["nome"].lower() and
+        e["treinos"].lower() == data.get["treinos", ""].lower()
+        for e in exercicios
+    ):
+        raise HTTPException(status_code=409, detail="Já existe um exercício com esse nome nesse treino")
     exercicios.append({
         "nome":       data.get("nome", ""),
         "treino":     data.get("treino", ""),
@@ -325,6 +333,8 @@ async def post_metas(usuario: str, data: dict = Body(...)):
     if not data.get("descricao"):
         raise HTTPException(status_code=400, detail="Descrição obrigatória")
     metas = load_metas(usuario)
+    if any(m["descricao"].lower() == data["descricao"].lower() for m in metas):
+        raise HTTPException(status_code=409, detail="Já existe uma meta com essa descrição")
     metas.append({
         "descricao": data.get("descricao", ""),
         "prazo":     data.get("prazo", ""),
@@ -367,6 +377,8 @@ async def post_evolucoes(usuario: str, data: dict = Body(...)):
     if not data.get("data"):
         raise HTTPException(status_code=400, detail="Data obrigatória")
     evolucoes = load_evolucoes(usuario)
+    if any(e["data"] == data["data"] for e in evolucoes):
+        raise HTTPException(status_code=409, detail="Já existe um registro de evolução nessa data")
     evolucoes.append({
         "data":    data.get("data", ""),
         "peso":    data.get("peso", ""),
