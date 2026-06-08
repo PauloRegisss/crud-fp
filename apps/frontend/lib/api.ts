@@ -36,9 +36,15 @@ export interface Evolucao {
 	gordura: string | null;
 }
 
+export interface SugestaoItem extends Treino {
+	habitos_saudaveis?: string;
+	dicas?: string[];
+	ja_existe?: boolean;
+}
+
 export interface SugestaoResponse {
 	origem: string;
-	dados: Treino[];
+	dados: SugestaoItem[];
 }
 
 export interface AgenteResponse {
@@ -57,6 +63,15 @@ function stripNulls(obj: Record<string, unknown>): Record<string, unknown> {
 	return out;
 }
 
+class APIError extends Error {
+	status: number;
+	constructor(message: string, status: number) {
+		super(message);
+		this.name = "APIError";
+		this.status = status;
+	}
+}
+
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 	const body = options?.body as string | undefined;
 	const processedBody = body
@@ -71,10 +86,17 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 		},
 	});
 	if (!res.ok) {
-		throw new Error(`API error: ${res.status} ${res.statusText}`);
+		let message = `Erro ${res.status}`;
+		try {
+			const data = await res.json();
+			if (data.detail) message = data.detail;
+		} catch {}
+		throw new APIError(message, res.status);
 	}
 	return res.json();
 }
+
+export { APIError };
 
 export const api = {
 	login: (nome: string) =>

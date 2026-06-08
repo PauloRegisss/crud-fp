@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import datetime as dt
 from dotenv import load_dotenv
-import random
 
 load_dotenv(
     dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
@@ -42,8 +41,11 @@ def load_usuarios() -> list[str]:
     dir_failsafe()
     if not os.path.exists(ARQ_USUARIOS):
         return []
-    with open(ARQ_USUARIOS, "r", encoding="utf-8") as f:
-        return [linha.strip() for linha in f if linha.strip()]
+    try:
+        with open(ARQ_USUARIOS, "r", encoding="utf-8") as f:
+            return [linha.strip() for linha in f if linha.strip()]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao ler usuarios: {e}")
 
 
 def usuario_existe(nome: str) -> bool:
@@ -52,8 +54,11 @@ def usuario_existe(nome: str) -> bool:
 
 def criar_usuario(nome: str):
     dir_failsafe(nome)
-    with open(ARQ_USUARIOS, "a", encoding="utf-8") as f:
-        f.write(nome + "\n")
+    try:
+        with open(ARQ_USUARIOS, "a", encoding="utf-8") as f:
+            f.write(nome + "\n")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao criar usuario: {e}")
 
 
 def checar_usuario(usuario: str):
@@ -61,160 +66,172 @@ def checar_usuario(usuario: str):
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
 
-# TREINOS
-def save_treinos(usuario: str, treinos: list):
-    dir_failsafe(usuario)
-    path = get_usuario_path(usuario, "treinos.txt")
-    with open(path, "w", encoding="utf-8") as f:
-        for c in treinos:
-            linha = "|".join(
-                [
-                    c.get("nome", ""),
-                    c.get("tipo", ""),
-                    c.get("data", ""),
-                    c.get("duracao", ""),
-                    c.get("objetivo", ""),
-                    c.get("meta", ""),
-                ]
-            )
-            f.write(linha + "\n")
-
-
-def load_treinos(usuario: str) -> list:
-    dir_failsafe(usuario)
-    path = get_usuario_path(usuario, "treinos.txt")
-    treinos = []
+def _load_file(path: str) -> list[str]:
     if not os.path.exists(path):
-        return treinos
-    with open(path, "r", encoding="utf-8") as f:
-        for linha in f:
-            data = linha.strip().split("|")
-            if len(data) >= 4:
-                treinos.append(
-                    {
-                        "nome": data[0],
-                        "tipo": data[1],
-                        "data": data[2],
-                        "duracao": data[3],
-                        "objetivo": data[4] if len(data) > 4 else "",
-                        "meta": data[5] if len(data) > 5 else "",
-                    }
-                )
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return [linha.strip() for linha in f if linha.strip()]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao ler arquivo: {e}")
+
+
+def _save_file(path: str, linhas: list[str]):
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(linhas) + "\n")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao salvar arquivo: {e}")
+
+
+# TREINOS
+def load_treinos(usuario: str) -> list[dict]:
+    dir_failsafe(usuario)
+    path = get_usuario_path(usuario, "treinos.txt")
+    linhas = _load_file(path)
+    treinos = []
+    for linha in linhas:
+        data = linha.split("|")
+        if len(data) >= 4:
+            treinos.append(
+                {
+                    "nome": data[0],
+                    "tipo": data[1],
+                    "data": data[2],
+                    "duracao": data[3],
+                    "objetivo": data[4] if len(data) > 4 else "",
+                    "meta": data[5] if len(data) > 5 else "",
+                }
+            )
     return treinos
 
 
+def save_treinos(usuario: str, treinos: list):
+    dir_failsafe(usuario)
+    path = get_usuario_path(usuario, "treinos.txt")
+    linhas = []
+    for c in treinos:
+        linha = "|".join(
+            [
+                c.get("nome", ""),
+                c.get("tipo", ""),
+                c.get("data", ""),
+                c.get("duracao", ""),
+                c.get("objetivo", ""),
+                c.get("meta", ""),
+            ]
+        )
+        linhas.append(linha)
+    _save_file(path, linhas)
+
+
 # EXERCICIOS
-def save_exercicios(usuario: str, exercicios: list):
+def load_exercicios(usuario: str) -> list[dict]:
     dir_failsafe(usuario)
     path = get_usuario_path(usuario, "exercicios.txt")
-    with open(path, "w", encoding="utf-8") as f:
-        for c in exercicios:
-            linha = "|".join(
-                [
-                    c.get("nome", ""),
-                    c.get("treino", ""),
-                    c.get("modo", ""),
-                    str(c.get("series", 0)),
-                    str(c.get("repeticoes", 0)),
-                    str(c.get("tempo", 0)),
-                    str(c.get("distancia", 0)),
-                ]
-            )
-            f.write(linha + "\n")
-
-
-def load_exercicios(usuario: str) -> list:
-    dir_failsafe(usuario)
-    path = get_usuario_path(usuario, "exercicios.txt")
+    linhas = _load_file(path)
     exercicios = []
-    if not os.path.exists(path):
-        return exercicios
-    with open(path, "r", encoding="utf-8") as f:
-        for linha in f:
-            data = linha.strip().split("|")
-            if len(data) >= 7:
-                exercicios.append(
-                    {
-                        "nome": data[0],
-                        "treino": data[1],
-                        "modo": data[2],
-                        "series": data[3],
-                        "repeticoes": data[4],
-                        "tempo": data[5],
-                        "distancia": data[6],
-                    }
-                )
+    for linha in linhas:
+        data = linha.split("|")
+        if len(data) >= 7:
+            exercicios.append(
+                {
+                    "nome": data[0],
+                    "treino": data[1],
+                    "modo": data[2],
+                    "series": data[3],
+                    "repeticoes": data[4],
+                    "tempo": data[5],
+                    "distancia": data[6],
+                }
+            )
     return exercicios
 
 
+def save_exercicios(usuario: str, exercicios: list):
+    dir_failsafe(usuario)
+    path = get_usuario_path(usuario, "exercicios.txt")
+    linhas = []
+    for c in exercicios:
+        linha = "|".join(
+            [
+                c.get("nome", ""),
+                c.get("treino", ""),
+                c.get("modo", ""),
+                str(c.get("series", 0)),
+                str(c.get("repeticoes", 0)),
+                str(c.get("tempo", 0)),
+                str(c.get("distancia", 0)),
+            ]
+        )
+        linhas.append(linha)
+    _save_file(path, linhas)
+
+
 # METAS
-def save_metas(usuario: str, metas: list):
+def load_metas(usuario: str) -> list[dict]:
     dir_failsafe(usuario)
     path = get_usuario_path(usuario, "metas.txt")
-    with open(path, "w", encoding="utf-8") as f:
-        for m in metas:
-            linha = "|".join(
-                [
-                    str(m.get("descricao", "")),
-                    str(m.get("prazo", "")),
-                    str(m.get("status", "Em andamento")),
-                ]
-            )
-            f.write(linha + "\n")
-
-
-def load_metas(usuario: str) -> list:
-    dir_failsafe(usuario)
-    path = get_usuario_path(usuario, "metas.txt")
+    linhas = _load_file(path)
     metas = []
-    if not os.path.exists(path):
-        return metas
-    with open(path, "r", encoding="utf-8") as f:
-        for linha in f:
-            data = linha.strip().split("|")
-            if len(data) >= 3:
-                metas.append(
-                    {"descricao": data[0], "prazo": data[1], "status": data[2]}
-                )
+    for linha in linhas:
+        data = linha.split("|")
+        if len(data) >= 3:
+            metas.append({"descricao": data[0], "prazo": data[1], "status": data[2]})
     return metas
 
 
+def save_metas(usuario: str, metas: list):
+    dir_failsafe(usuario)
+    path = get_usuario_path(usuario, "metas.txt")
+    linhas = []
+    for m in metas:
+        linha = "|".join(
+            [
+                str(m.get("descricao", "")),
+                str(m.get("prazo", "")),
+                str(m.get("status", "Em andamento")),
+            ]
+        )
+        linhas.append(linha)
+    _save_file(path, linhas)
+
+
 # EVOLUCOES
+def load_evolucoes(usuario: str) -> list[dict]:
+    dir_failsafe(usuario)
+    path = get_usuario_path(usuario, "evolucao.txt")
+    linhas = _load_file(path)
+    evolucoes = []
+    for linha in linhas:
+        data = linha.split("|")
+        if len(data) >= 4:
+            evolucoes.append(
+                {
+                    "data": data[0],
+                    "peso": data[1],
+                    "altura": data[2],
+                    "gordura": data[3],
+                }
+            )
+    return evolucoes
+
+
 def save_evolucoes(usuario: str, evolucoes: list):
     dir_failsafe(usuario)
     path = get_usuario_path(usuario, "evolucao.txt")
-    with open(path, "w", encoding="utf-8") as f:
-        for e in evolucoes:
-            linha = "|".join(
-                [
-                    e.get("data", ""),
-                    str(e.get("peso", 0)),
-                    str(e.get("altura", 0)),
-                    str(e.get("gordura", 0)),
-                ]
-            )
-            f.write(linha + "\n")
-
-
-def load_evolucoes(usuario: str) -> list:
-    dir_failsafe(usuario)
-    path = get_usuario_path(usuario, "evolucao.txt")
-    evolucoes = []
-    if not os.path.exists(path):
-        return evolucoes
-    with open(path, "r", encoding="utf-8") as f:
-        for linha in f:
-            data = linha.strip().split("|")
-            if len(data) >= 4:
-                evolucoes.append(
-                    {
-                        "data": data[0],
-                        "peso": data[1],
-                        "altura": data[2],
-                        "gordura": data[3],
-                    }
-                )
-    return evolucoes
+    linhas = []
+    for e in evolucoes:
+        linha = "|".join(
+            [
+                e.get("data", ""),
+                str(e.get("peso", 0)),
+                str(e.get("altura", 0)),
+                str(e.get("gordura", 0)),
+            ]
+        )
+        linhas.append(linha)
+    _save_file(path, linhas)
 
 
 # ROTAS USUARIO
@@ -274,11 +291,16 @@ async def edit_treino(usuario: str, nome: str, data: dict = Body(...)):
     treinos = load_treinos(usuario)
     for c in treinos:
         if c["nome"] == nome:
-            c["tipo"] = data.get("tipo", c["tipo"])
-            c["data"] = data.get("data", c["data"])
-            c["duracao"] = data.get("duracao", c["duracao"])
-            c["objetivo"] = data.get("objetivo", c["objetivo"])
-            c["meta"] = data.get("meta", c["meta"])
+            if "tipo" in data:
+                c["tipo"] = data["tipo"]
+            if "data" in data:
+                c["data"] = data["data"]
+            if "duracao" in data:
+                c["duracao"] = data["duracao"]
+            if "objetivo" in data:
+                c["objetivo"] = data["objetivo"]
+            if "meta" in data:
+                c["meta"] = data["meta"]
             break
     else:
         raise HTTPException(status_code=404, detail="Treino não encontrado")
@@ -317,7 +339,7 @@ async def post_exercicios(usuario: str, data: dict = Body(...)):
     exercicios = load_exercicios(usuario)
     if any(
         e["nome"].lower() == data["nome"].lower()
-        and e["treinos"].lower() == data.get["treinos", ""].lower()
+        and e["treino"].lower() == data.get("treino", "").lower()
         for e in exercicios
     ):
         raise HTTPException(
@@ -344,17 +366,20 @@ async def edit_exercicios(usuario: str, index: int, data: dict = Body(...)):
     exercicios = load_exercicios(usuario)
     if index < 0 or index >= len(exercicios):
         raise HTTPException(status_code=404, detail="Exercício não encontrado")
-    exercicios[index]["nome"] = data.get("nome", exercicios[index]["nome"])
-    exercicios[index]["treino"] = data.get("treino", exercicios[index]["treino"])
-    exercicios[index]["modo"] = data.get("modo", exercicios[index]["modo"])
-    exercicios[index]["series"] = data.get("series", exercicios[index]["series"])
-    exercicios[index]["repeticoes"] = data.get(
-        "repeticoes", exercicios[index]["repeticoes"]
-    )
-    exercicios[index]["tempo"] = data.get("tempo", exercicios[index]["tempo"])
-    exercicios[index]["distancia"] = data.get(
-        "distancia", exercicios[index]["distancia"]
-    )
+    if "nome" in data:
+        exercicios[index]["nome"] = data["nome"]
+    if "treino" in data:
+        exercicios[index]["treino"] = data["treino"]
+    if "modo" in data:
+        exercicios[index]["modo"] = data["modo"]
+    if "series" in data:
+        exercicios[index]["series"] = data["series"]
+    if "repeticoes" in data:
+        exercicios[index]["repeticoes"] = data["repeticoes"]
+    if "tempo" in data:
+        exercicios[index]["tempo"] = data["tempo"]
+    if "distancia" in data:
+        exercicios[index]["distancia"] = data["distancia"]
     save_exercicios(usuario, exercicios)
     return {"ok": True}
 
@@ -404,9 +429,12 @@ async def edit_meta(usuario: str, index: int, data: dict = Body(...)):
     metas = load_metas(usuario)
     if index < 0 or index >= len(metas):
         raise HTTPException(status_code=404, detail="Meta não encontrada")
-    metas[index]["descricao"] = data.get("descricao", metas[index]["descricao"])
-    metas[index]["prazo"] = data.get("prazo", metas[index]["prazo"])
-    metas[index]["status"] = data.get("status", metas[index]["status"])
+    if "descricao" in data:
+        metas[index]["descricao"] = data["descricao"]
+    if "prazo" in data:
+        metas[index]["prazo"] = data["prazo"]
+    if "status" in data:
+        metas[index]["status"] = data["status"]
     save_metas(usuario, metas)
     return {"ok": True}
 
@@ -457,10 +485,14 @@ async def edit_evolucoes(usuario: str, index: int, data: dict = Body(...)):
     evolucoes = load_evolucoes(usuario)
     if index < 0 or index >= len(evolucoes):
         raise HTTPException(status_code=404, detail="Evolução não encontrada")
-    evolucoes[index]["data"] = data.get("data", evolucoes[index]["data"])
-    evolucoes[index]["peso"] = data.get("peso", evolucoes[index]["peso"])
-    evolucoes[index]["altura"] = data.get("altura", evolucoes[index]["altura"])
-    evolucoes[index]["gordura"] = data.get("gordura", evolucoes[index]["gordura"])
+    if "data" in data:
+        evolucoes[index]["data"] = data["data"]
+    if "peso" in data:
+        evolucoes[index]["peso"] = data["peso"]
+    if "altura" in data:
+        evolucoes[index]["altura"] = data["altura"]
+    if "gordura" in data:
+        evolucoes[index]["gordura"] = data["gordura"]
     save_evolucoes(usuario, evolucoes)
     return {"ok": True}
 
@@ -475,6 +507,7 @@ async def delete_evolucoes(usuario: str, index: int):
     save_evolucoes(usuario, evolucoes)
     return {"ok": True}
 
+
 # SUGESTOES
 SUGESTOES_PADRAO = {
     "Hipertrofia": [
@@ -484,7 +517,7 @@ SUGESTOES_PADRAO = {
             "data": "",
             "duracao": "60 min",
             "objetivo": "Hipertrofia",
-            "meta": "Ganho de massa magra"
+            "meta": "Ganho de massa magra",
         },
         {
             "nome": "Sugestão: costas e bíceps",
@@ -492,7 +525,7 @@ SUGESTOES_PADRAO = {
             "data": "",
             "duracao": "60 min",
             "objetivo": "Hipertrofia",
-            "meta": "Ganho de massa magra"
+            "meta": "Ganho de massa magra",
         },
         {
             "nome": "Sugestão: pernas completas",
@@ -500,7 +533,7 @@ SUGESTOES_PADRAO = {
             "data": "",
             "duracao": "75 min",
             "objetivo": "Hipertrofia",
-            "meta": "Ganho de massa magra"
+            "meta": "Ganho de massa magra",
         },
         {
             "nome": "Sugestão: ombros e trapézio",
@@ -508,7 +541,7 @@ SUGESTOES_PADRAO = {
             "data": "",
             "duracao": "50 min",
             "objetivo": "Hipertrofia",
-            "meta": "Desenvolvimento muscular"
+            "meta": "Desenvolvimento muscular",
         },
         {
             "nome": "Sugestão: full body intenso",
@@ -516,10 +549,9 @@ SUGESTOES_PADRAO = {
             "data": "",
             "duracao": "70 min",
             "objetivo": "Hipertrofia",
-            "meta": "Aumento de massa muscular"
-        }
+            "meta": "Aumento de massa muscular",
+        },
     ],
-
     "Emagrecimento": [
         {
             "nome": "Sugestão: corrida",
@@ -527,7 +559,7 @@ SUGESTOES_PADRAO = {
             "data": "",
             "duracao": "45 min",
             "objetivo": "Emagrecimento",
-            "meta": "Déficit calórico"
+            "meta": "Déficit calórico",
         },
         {
             "nome": "Sugestão: caminhada acelerada",
@@ -535,7 +567,7 @@ SUGESTOES_PADRAO = {
             "data": "",
             "duracao": "60 min",
             "objetivo": "Emagrecimento",
-            "meta": "Queima de gordura"
+            "meta": "Queima de gordura",
         },
         {
             "nome": "Sugestão: HIIT",
@@ -543,7 +575,7 @@ SUGESTOES_PADRAO = {
             "data": "",
             "duracao": "30 min",
             "objetivo": "Emagrecimento",
-            "meta": "Alto gasto calórico"
+            "meta": "Alto gasto calórico",
         },
         {
             "nome": "Sugestão: bicicleta ergométrica",
@@ -551,7 +583,7 @@ SUGESTOES_PADRAO = {
             "data": "",
             "duracao": "50 min",
             "objetivo": "Emagrecimento",
-            "meta": "Melhora cardiovascular"
+            "meta": "Melhora cardiovascular",
         },
         {
             "nome": "Sugestão: circuito funcional",
@@ -559,32 +591,69 @@ SUGESTOES_PADRAO = {
             "data": "",
             "duracao": "40 min",
             "objetivo": "Emagrecimento",
-            "meta": "Redução de gordura corporal"
-        }
-    ]
+            "meta": "Redução de gordura corporal",
+        },
+    ],
 }
 
-def loaded_sugestoes(usuario: str, objetivo: str = None):
-    hoje = dt.date.today().strftime("%d/%m/%Y")
 
+def _personalize_sugestoes(usuario: str, objetivo: str = None) -> dict:
+    hoje = dt.date.today().strftime("%d/%m/%Y")
+    treinos = load_treinos(usuario)
+    exercicios = load_exercicios(usuario)
+    nomes_existentes = {t["nome"].lower() for t in treinos}
+
+    categorias = []
     if objetivo and objetivo in SUGESTOES_PADRAO:
-        dados = [s.copy() for s in SUGESTOES_PADRAO[objetivo]]
-        for s in dados:
-            s["data"] = s.get("data") or hoje
-        return {"origem": "sugestao", "dados": dados}
+        categorias = [objetivo]
+    else:
+        categorias = list(SUGESTOES_PADRAO.keys())
 
     todas = []
-    for cat, lista in SUGESTOES_PADRAO.items():
-        for s in lista:
+    for cat in categorias:
+        for s in SUGESTOES_PADRAO[cat]:
             item = s.copy()
             item["data"] = item.get("data") or hoje
+
+            if "hipertrofia" in cat.lower() and exercicios:
+                habitos = (
+                    " Mantenha uma dieta rica em proteínas (1.6-2.2g/kg), "
+                    "descanse 48h entre treinos do mesmo grupo muscular e "
+                    "priorize o sono de qualidade (7-9h)."
+                )
+                dicas = [
+                    "Para hipertrofia, priorize exercícios compostos como supino, agachamento e terra.",
+                    "A progressão de carga é fundamental: aumente o peso gradualmente a cada semana.",
+                    "Descanse 2-3 minutos entre séries para exercícios pesados.",
+                ]
+            elif "emagrecimento" in cat.lower():
+                habitos = (
+                    " Combine exercícios com uma alimentação com déficit calórico moderado "
+                    "(300-500 kcal). Priorize proteínas para preservar massa muscular."
+                )
+                dicas = [
+                    "O HIIT é mais eficiente para queima calórica em pouco tempo.",
+                    "Não negligencie o treino de força — ele acelera o metabolismo.",
+                    "Hidrate-se bem e priorize alimentos integrais.",
+                ]
+            else:
+                habitos = " Mantenha uma rotina consistente de treinos e uma alimentação balanceada."
+                dicas = []
+
+            item["habitos_saudaveis"] = habitos
+            item["dicas"] = dicas
+            item["ja_existe"] = item["nome"].lower() in nomes_existentes
+
             todas.append(item)
+
     return {"origem": "sugestao", "dados": todas}
+
 
 @app.get("/sugestoes/{usuario}")
 async def get_sugestoes(usuario: str, objetivo: str = None):
     checar_usuario(usuario)
-    return loaded_sugestoes(usuario, objetivo)
+    return _personalize_sugestoes(usuario, objetivo)
+
 
 # AGENTE
 def montar_contexto(usuario: str):
@@ -594,7 +663,7 @@ def montar_contexto(usuario: str):
     evolucoes = load_evolucoes(usuario)
 
     contexto = (
-        f"Você é um assistente personal trainer inteligente. Responda em português.\n"
+        "Você é um assistente personal trainer inteligente. Responda em português.\n"
     )
     contexto += f"Você está atendendo o usuário: {usuario}\n\n"
 
@@ -626,25 +695,31 @@ async def agente(usuario: str, data: dict = Body(...)):
     if not pergunta:
         raise HTTPException(status_code=400, detail="Pergunta obrigatória")
 
-    contexto = montar_contexto(usuario)
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=1024,
-        system=(
-            "Você é um personal trainer virtual especializado em fitness, "
-            "musculação, nutrição esportiva e saúde física. Responda APENAS "
-            "perguntas relacionadas a esses temas. Se o usuário perguntar sobre "
-            "qualquer assunto fora desse escopo, recuse educadamente e redirecione "
-            "para temas fitness. Responda sempre em português brasileiro. "
-            "Use os dados do usuário fornecidos no contexto para personalizar "
-            "suas respostas quando possível."
-        ),
-        messages=[
-            {
-                "role": "user",
-                "content": f"{contexto}\n\nPergunta do usuário: {pergunta}",
-            }
-        ],
-    )
-    resposta = message.content[0].text
-    return {"resposta": resposta}
+    try:
+        contexto = montar_contexto(usuario)
+        message = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1024,
+            system=(
+                "Você é um personal trainer virtual especializado em fitness, "
+                "musculação, nutrição esportiva e saúde física. Responda APENAS "
+                "perguntas relacionadas a esses temas. Se o usuário perguntar sobre "
+                "qualquer assunto fora desse escopo, recuse educadamente e redirecione "
+                "para temas fitness. Responda sempre em português brasileiro. "
+                "Use os dados do usuário fornecidos no contexto para personalizar "
+                "suas respostas quando possível."
+            ),
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"{contexto}\n\nPergunta do usuário: {pergunta}",
+                }
+            ],
+        )
+        resposta = message.content[0].text
+        return {"resposta": resposta}
+    except Exception as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Não foi possível consultar o assistente IA. Tente novamente mais tarde. Erro: {e}",
+        )
