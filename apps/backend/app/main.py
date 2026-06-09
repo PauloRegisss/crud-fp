@@ -317,7 +317,7 @@ async def post_exercicios(usuario: str, data: dict = Body(...)):
     exercicios = load_exercicios(usuario)
     if any(
         e["nome"].lower() == data["nome"].lower()
-        and e["treinos"].lower() == data.get["treinos", ""].lower()
+        and e["treino"].lower() == data.get("treino", "").lower()
         for e in exercicios
     ):
         raise HTTPException(
