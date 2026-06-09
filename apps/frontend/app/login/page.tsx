@@ -28,7 +28,7 @@ const userSchema = z.object({
 export default function LoginPage() {
 	const [loginIsLoading, setLoginFunction] = useTransition();
 	const form = useForm<z.infer<typeof userSchema>>({
-		resolver: zodResolver(userSchema as any),
+		resolver: zodResolver(userSchema),
 		defaultValues: {
 			nome: "",
 		},

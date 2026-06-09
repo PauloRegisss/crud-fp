@@ -47,7 +47,7 @@ export default function SugestoesPage() {
 	return (
 		<div className="min-h-screen bg-[#f8faf8] p-6 md:p-10">
 			<div className="mb-8">
-				<h1 className="text-2xl font-bold text-[#0f1a0f]">Sugestoes</h1>
+				<h1 className="text-2xl font-bold text-[#0f1a0f]">Sugestões</h1>
 				<p className="text-sm text-[#6a7a6a]">
 					Recomendacoes de treinos personalizadas para voce
 				</p>
@@ -73,9 +73,9 @@ export default function SugestoesPage() {
 			{sugestoes.length === 0 ? (
 				<div className="flex flex-col items-center justify-center rounded-2xl border bg-white py-16 shadow-sm">
 					<Lightbulb className="size-12 text-[#4a5a4a]/30" />
-					<p className="mt-4 text-[#4a5a4a]">Nenhuma sugestao disponivel</p>
+					<p className="mt-4 text-[#4a5a4a]">Nenhuma sugestão disponível</p>
 					<p className="text-sm text-[#8a9a8a]">
-						Selecione um objetivo para ver sugestoes de treinos
+						Selecione um objetivo para ver sugestões de treinos
 					</p>
 				</div>
 			) : (
