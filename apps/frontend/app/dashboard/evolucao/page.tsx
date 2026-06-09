@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, Plus, Trash2, TrendingUp } from "lucide-react";
+import { LoaderCircle, Pencil, Plus, Trash2, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -160,6 +160,130 @@ function CreateEvolucaoDialog({ onCreated }: { onCreated: () => void }) {
 	);
 }
 
+function EditEvolucaoDialog({
+	evolucao,
+	index,
+	onSaved,
+}: {
+	evolucao: Evolucao;
+	index: number;
+	onSaved: () => void;
+}) {
+	const [open, setOpen] = useState(false);
+	const [loading, setLoading] = useState(false);
+	const { updateEvolucao } = useAuth();
+	const { control, handleSubmit, reset } = useForm<EvolucaoFormData>({
+		resolver: zodResolver(evolucaoSchema as any),
+		defaultValues: {
+			data: evolucao.data ?? "",
+			peso: evolucao.peso ?? "",
+			altura: evolucao.altura ?? "",
+			gordura: evolucao.gordura ?? "",
+		},
+	});
+
+	async function onSubmit(data: EvolucaoFormData) {
+		setLoading(true);
+		try {
+			await updateEvolucao(index, {
+				data: data.data || undefined,
+				peso: data.peso || undefined,
+				altura: data.altura || undefined,
+				gordura: data.gordura || undefined,
+			});
+			setOpen(false);
+			onSaved();
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	return (
+		<Dialog
+			open={open}
+			onOpenChange={(v) => {
+				setOpen(v);
+				if (!v) reset();
+			}}
+		>
+			<DialogTrigger asChild>
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					className="text-[#4a5a4a] hover:bg-[#f0f9f0] hover:text-green-700"
+				>
+					<Pencil className="size-4" />
+				</Button>
+			</DialogTrigger>
+			<DialogContent>
+				<DialogTitle>Editar Medição</DialogTitle>
+				<DialogDescription>Altere os dados da medição</DialogDescription>
+				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+					<div className="flex flex-col gap-1.5">
+						<Controller
+							name="data"
+							control={control}
+							render={({ field, fieldState }) => (
+								<>
+									<Label htmlFor="edit-ev-data">Data *</Label>
+									<Input id="edit-ev-data" type="date" {...field} />
+									{fieldState.invalid && (
+										<FieldError errors={[fieldState.error]} />
+									)}
+								</>
+							)}
+						/>
+					</div>
+					<div className="grid grid-cols-3 gap-3">
+						<div className="flex flex-col gap-1.5">
+							<Controller
+								name="peso"
+								control={control}
+								render={({ field }) => (
+									<>
+										<Label htmlFor="edit-ev-peso">Peso (kg)</Label>
+										<Input id="edit-ev-peso" type="number" step="0.1" {...field} />
+									</>
+								)}
+							/>
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Controller
+								name="altura"
+								control={control}
+								render={({ field }) => (
+									<>
+										<Label htmlFor="edit-ev-altura">Altura (m)</Label>
+										<Input id="edit-ev-altura" type="number" step="0.01" {...field} />
+									</>
+								)}
+							/>
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Controller
+								name="gordura"
+								control={control}
+								render={({ field }) => (
+									<>
+										<Label htmlFor="edit-ev-gordura">Gordura (%)</Label>
+										<Input id="edit-ev-gordura" type="number" step="0.1" {...field} />
+									</>
+								)}
+							/>
+						</div>
+					</div>
+					<Button type="submit" disabled={loading} className="mt-2 gap-1.5">
+						{loading && <LoaderCircle className="size-4 animate-spin" />}
+						{loading ? "Salvando..." : "Salvar"}
+					</Button>
+				</form>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
 export default function EvolucaoPage() {
 	const { user, isLoading, fetchEvolucoes, deleteEvolucao } = useAuth();
 	const [evolucoes, setEvolucoes] = useState<Evolucao[]>([]);
@@ -289,14 +413,21 @@ export default function EvolucaoPage() {
 									</div>
 								</div>
 							</div>
-							<Button
-								variant="ghost"
-								size="icon-sm"
-								onClick={() => setDeleteIndex(i)}
-								className="text-red-500 hover:bg-red-50 hover:text-red-600"
-							>
-								<Trash2 className="size-4" />
-							</Button>
+							<div className="flex items-center gap-1">
+								<EditEvolucaoDialog
+									evolucao={ev}
+									index={i}
+									onSaved={loadData}
+								/>
+								<Button
+									variant="ghost"
+									size="icon-sm"
+									onClick={() => setDeleteIndex(i)}
+									className="text-red-500 hover:bg-red-50 hover:text-red-600"
+								>
+									<Trash2 className="size-4" />
+								</Button>
+							</div>
 						</div>
 					))}
 				</div>

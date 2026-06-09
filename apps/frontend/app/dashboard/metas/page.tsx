@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, Plus, Target, Trash2 } from "lucide-react";
+import { LoaderCircle, Pencil, Plus, Target, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -147,6 +147,123 @@ function CreateMetaDialog({ onCreated }: { onCreated: () => void }) {
 	);
 }
 
+function EditMetaDialog({
+	meta,
+	index,
+	onSaved,
+}: {
+	meta: Meta;
+	index: number;
+	onSaved: () => void;
+}) {
+	const [open, setOpen] = useState(false);
+	const [loading, setLoading] = useState(false);
+	const { updateMeta } = useAuth();
+	const { control, handleSubmit, reset } = useForm<MetaFormData>({
+		resolver: zodResolver(metaSchema as any),
+		defaultValues: {
+			descricao: meta.descricao,
+			prazo: meta.prazo != null ? String(meta.prazo) : "",
+			status: meta.status ?? "Em andamento",
+		},
+	});
+
+	async function onSubmit(data: MetaFormData) {
+		setLoading(true);
+		try {
+			await updateMeta(index, {
+				descricao: data.descricao,
+				prazo: data.prazo ? Number(data.prazo) : null,
+				status: data.status || null,
+			});
+			setOpen(false);
+			onSaved();
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	return (
+		<Dialog
+			open={open}
+			onOpenChange={(v) => {
+				setOpen(v);
+				if (!v) reset();
+			}}
+		>
+			<DialogTrigger asChild>
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					className="text-[#4a5a4a] hover:bg-[#f0f9f0] hover:text-green-700"
+				>
+					<Pencil className="size-4" />
+				</Button>
+			</DialogTrigger>
+			<DialogContent>
+				<DialogTitle>Editar Meta</DialogTitle>
+				<DialogDescription>Altere os dados da meta</DialogDescription>
+				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+					<div className="flex flex-col gap-1.5">
+						<Controller
+							name="descricao"
+							control={control}
+							render={({ field, fieldState }) => (
+								<>
+									<Label htmlFor="edit-meta-desc">Descrição *</Label>
+									<Input id="edit-meta-desc" {...field} />
+									{fieldState.invalid && (
+										<FieldError errors={[fieldState.error]} />
+									)}
+								</>
+							)}
+						/>
+					</div>
+					<div className="flex flex-col gap-1.5">
+						<Controller
+							name="prazo"
+							control={control}
+							render={({ field }) => (
+								<>
+									<Label htmlFor="edit-meta-prazo">Prazo (dias)</Label>
+									<Input id="edit-meta-prazo" type="number" {...field} />
+								</>
+							)}
+						/>
+					</div>
+					<div className="flex flex-col gap-1.5">
+						<Controller
+							name="status"
+							control={control}
+							render={({ field }) => (
+								<>
+									<Label htmlFor="edit-meta-status">Status</Label>
+									<select
+										id="edit-meta-status"
+										value={field.value}
+										onChange={field.onChange}
+										className="flex h-9 w-full rounded-lg border border-[#e8f0e8] bg-white px-3 text-sm text-[#0f1a0f] outline-none focus:border-green-600 focus:ring-2 focus:ring-green-600/20"
+									>
+										<option value="Em andamento">Em andamento</option>
+										<option value="Concluída">Concluída</option>
+										<option value="Pendente">Pendente</option>
+									</select>
+								</>
+							)}
+						/>
+					</div>
+					<Button type="submit" disabled={loading} className="mt-2 gap-1.5">
+						{loading && <LoaderCircle className="size-4 animate-spin" />}
+						{loading ? "Salvando..." : "Salvar"}
+					</Button>
+				</form>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
 const statusColors: Record<string, string> = {
 	"Em andamento": "bg-blue-50 text-blue-700 border-blue-200",
 	Concluída: "bg-green-50 text-green-700 border-green-200",
@@ -269,6 +386,11 @@ export default function MetasPage() {
 									<Badge className={`${colorClass} border`}>
 										{meta.status ?? "Pendente"}
 									</Badge>
+									<EditMetaDialog
+										meta={meta}
+										index={realIndex}
+										onSaved={loadData}
+									/>
 									<Button
 										variant="ghost"
 										size="icon-sm"
