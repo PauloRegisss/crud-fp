@@ -24,8 +24,8 @@ import { Label } from "@/components/ui/label";
 const metaSchema = z.object({
 	descricao: z
 		.string()
-		.min(1, "A descricao e obrigatoria.")
-		.max(128, "A descricao pode ter no maximo 128 caracteres."),
+		.min(1, "A descrição é obrigatória.")
+		.max(128, "A descrição pode ter no máximo 128 caracteres."),
 	prazo: z.string(),
 	status: z.string(),
 });
@@ -34,13 +34,13 @@ type MetaFormData = z.infer<typeof metaSchema>;
 
 const statusColors: Record<string, string> = {
 	"Em andamento": "bg-blue-50 text-blue-700 border-blue-200",
-	Concluida: "bg-green-50 text-green-700 border-green-200",
+	Concluída: "bg-green-50 text-green-700 border-green-200",
 	Pendente: "bg-amber-50 text-amber-700 border-amber-200",
 };
 
 const statusOptions = [
 	{ value: "Em andamento", label: "Em andamento" },
-	{ value: "Concluida", label: "Concluida" },
+	{ value: "Concluída", label: "Concluída" },
 	{ value: "Pendente", label: "Pendente" },
 ];
 
@@ -91,7 +91,7 @@ function CreateMetaDialog({ onCreated }: { onCreated: () => void }) {
 			</DialogTrigger>
 			<DialogContent>
 				<DialogTitle>Nova Meta</DialogTitle>
-				<DialogDescription>Defina um objetivo para alcancar</DialogDescription>
+				<DialogDescription>Defina um objetivo para alcançar</DialogDescription>
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
 						<Controller
@@ -99,7 +99,7 @@ function CreateMetaDialog({ onCreated }: { onCreated: () => void }) {
 							control={control}
 							render={({ field, fieldState }) => (
 								<>
-									<Label htmlFor="descricao">Descricao *</Label>
+									<Label htmlFor="descricao">Descrição *</Label>
 									<Input
 										id="descricao"
 										placeholder="Ex: Perder 5kg"
@@ -237,7 +237,7 @@ function EditMetaDialog({
 							control={control}
 							render={({ field, fieldState }) => (
 								<>
-									<Label>Descricao *</Label>
+									<Label>Descrição *</Label>
 									<Input placeholder="Ex: Perder 5kg" {...field} />
 									{fieldState.invalid && (
 										<FieldError errors={[fieldState.error]} />
@@ -354,7 +354,7 @@ export default function MetasPage() {
 			</div>
 
 			<div className="mb-6 flex gap-2">
-				{["Todas", "Em andamento", "Concluida", "Pendente"].map((s) => (
+				{["Todas", "Em andamento", "Concluída", "Pendente"].map((s) => (
 					<button
 						key={s}
 						type="button"

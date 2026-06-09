@@ -38,7 +38,7 @@ export default function SugestoesPage() {
 				.then(() => {})
 				.catch((err: unknown) => {
 					toast.error(
-						err instanceof Error ? err.message : "Erro ao carregar sugestoes",
+						err instanceof Error ? err.message : "Erro ao carregar sugestões",
 					);
 				})
 				.finally(() => setLoading(false));
@@ -56,7 +56,7 @@ export default function SugestoesPage() {
 			await fetchSugestoes(obj || undefined);
 		} catch (err: unknown) {
 			toast.error(
-				err instanceof Error ? err.message : "Erro ao filtrar sugestoes",
+				err instanceof Error ? err.message : "Erro ao filtrar sugestões",
 			);
 		} finally {
 			setLoading(false);
@@ -74,9 +74,9 @@ export default function SugestoesPage() {
 	return (
 		<div className="min-h-screen bg-[#f8faf8] p-6 md:p-10">
 			<div className="mb-8">
-				<h1 className="text-2xl font-bold text-[#0f1a0f]">Sugestoes</h1>
+				<h1 className="text-2xl font-bold text-[#0f1a0f]">Sugestões</h1>
 				<p className="text-sm text-[#6a7a6a]">
-					Recomendacoes de treinos personalizados para voce
+					Recomendações de treinos personalizados para você
 				</p>
 			</div>
 
@@ -100,9 +100,9 @@ export default function SugestoesPage() {
 			{items.length === 0 ? (
 				<div className="flex flex-col items-center justify-center rounded-2xl border bg-white py-16 shadow-sm">
 					<Lightbulb className="size-12 text-[#4a5a4a]/30" />
-					<p className="mt-4 text-[#4a5a4a]">Nenhuma sugestao disponivel</p>
+					<p className="mt-4 text-[#4a5a4a]">Nenhuma sugestão disponível</p>
 					<p className="text-sm text-[#8a9a8a]">
-						Selecione um objetivo para ver sugestoes de treinos
+						Selecione um objetivo para ver sugestões de treinos
 					</p>
 				</div>
 			) : (
@@ -135,7 +135,7 @@ export default function SugestoesPage() {
 												</h3>
 												{treino.ja_existe && (
 													<Badge className="bg-gray-100 text-gray-600 border border-gray-200 text-xs">
-														Ja cadastrado
+														Já cadastrado
 													</Badge>
 												)}
 											</div>
@@ -192,7 +192,7 @@ export default function SugestoesPage() {
 										<div className="flex items-center gap-2 mb-1">
 											<CheckCircle2 className="size-4 text-green-600" />
 											<span className="text-sm font-medium text-green-800">
-												Habitos Saudaveis
+												Hábitos Saudáveis
 											</span>
 										</div>
 										<p className="text-sm text-green-700">

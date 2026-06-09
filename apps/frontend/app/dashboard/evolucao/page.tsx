@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const evolucaoSchema = z.object({
-	data: z.string().min(1, "A data e obrigatoria."),
+	data: z.string().min(1, "A data é obrigatória."),
 	peso: z.string(),
 	altura: z.string(),
 	gordura: z.string(),
@@ -73,11 +73,11 @@ function CreateEvolucaoDialog({ onCreated }: { onCreated: () => void }) {
 			<DialogTrigger asChild>
 				<Button size="sm" className="gap-1.5">
 					<Plus className="size-4" />
-					Nova Medicao
+					Nova Medição
 				</Button>
 			</DialogTrigger>
 			<DialogContent>
-				<DialogTitle>Nova Medicao</DialogTitle>
+				<DialogTitle>Nova Medição</DialogTitle>
 				<DialogDescription>Registre seus dados corporais</DialogDescription>
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
@@ -230,7 +230,7 @@ function EditEvolucaoDialog({
 				</Button>
 			</DialogTrigger>
 			<DialogContent>
-				<DialogTitle>Editar Medicao</DialogTitle>
+				<DialogTitle>Editar Medição</DialogTitle>
 				<DialogDescription>Atualize seus dados corporais</DialogDescription>
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
@@ -362,14 +362,14 @@ export default function EvolucaoPage() {
 				onOpenChange={(open) => {
 					if (!open) setDeleteIndex(null);
 				}}
-				title="Excluir medicao?"
-				description="Essa acao nao pode ser desfeita."
+				title="Excluir medição?"
+				description="Essa ação não pode ser desfeita."
 				onConfirm={handleConfirmDelete}
 			/>
 
 			<div className="mb-8 flex items-center justify-between">
 				<div>
-					<h1 className="text-2xl font-bold text-[#0f1a0f]">Evolucao</h1>
+					<h1 className="text-2xl font-bold text-[#0f1a0f]">Evolução</h1>
 					<p className="text-sm text-[#6a7a6a]">
 						Acompanhe seu progresso corporal
 					</p>
@@ -380,7 +380,7 @@ export default function EvolucaoPage() {
 			{pesoEntries.length > 1 && (
 				<div className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
 					<h3 className="mb-4 font-semibold text-[#0f1a0f]">
-						Evolucao do Peso
+						Evolução do Peso
 					</h3>
 					<div className="flex h-48 items-end gap-2">
 						{pesoEntries.map((entry, i) => {
@@ -413,9 +413,9 @@ export default function EvolucaoPage() {
 			{evolucoes.length === 0 ? (
 				<div className="flex flex-col items-center justify-center rounded-2xl border bg-white py-16 shadow-sm">
 					<TrendingUp className="size-12 text-[#4a5a4a]/30" />
-					<p className="mt-4 text-[#4a5a4a]">Nenhuma medicao registrada</p>
+					<p className="mt-4 text-[#4a5a4a]">Nenhuma medição registrada</p>
 					<p className="text-sm text-[#8a9a8a]">
-						Clique em "Nova Medicao" para comecar
+						Clique em "Nova Medição" para começar
 					</p>
 				</div>
 			) : (

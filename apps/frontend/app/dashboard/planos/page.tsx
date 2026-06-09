@@ -32,8 +32,8 @@ import { Label } from "@/components/ui/label";
 const treinoSchema = z.object({
 	nome: z
 		.string()
-		.min(1, "O nome e obrigatorio.")
-		.max(64, "O nome pode ter no maximo 64 caracteres."),
+		.min(1, "O nome é obrigatório.")
+		.max(64, "O nome pode ter no máximo 64 caracteres."),
 	tipo: z.string(),
 	data: z.string(),
 	duracao: z.string(),
@@ -120,7 +120,7 @@ function CreateTreinoDialog({ onCreated }: { onCreated: () => void }) {
 							render={({ field }) => (
 								<>
 									<Label htmlFor="tipo">Tipo</Label>
-									<Input id="tipo" placeholder="Ex: Forca, Cardio" {...field} />
+									<Input id="tipo" placeholder="Ex: Força, Cardio" {...field} />
 								</>
 							)}
 						/>
@@ -144,7 +144,7 @@ function CreateTreinoDialog({ onCreated }: { onCreated: () => void }) {
 								control={control}
 								render={({ field }) => (
 									<>
-										<Label htmlFor="duracao">Duracao</Label>
+										<Label htmlFor="duracao">Duração</Label>
 										<Input id="duracao" placeholder="Ex: 60 min" {...field} />
 									</>
 								)}
@@ -286,7 +286,7 @@ function EditTreinoDialog({
 									<Label htmlFor="edit-tipo">Tipo</Label>
 									<Input
 										id="edit-tipo"
-										placeholder="Ex: Forca, Cardio"
+										placeholder="Ex: Força, Cardio"
 										{...field}
 									/>
 								</>
@@ -312,7 +312,7 @@ function EditTreinoDialog({
 								control={control}
 								render={({ field }) => (
 									<>
-										<Label htmlFor="edit-duracao">Duracao</Label>
+										<Label htmlFor="edit-duracao">Duração</Label>
 										<Input
 											id="edit-duracao"
 											placeholder="Ex: 60 min"
@@ -368,8 +368,8 @@ function EditTreinoDialog({
 const exercicioSchema = z.object({
 	nome: z
 		.string()
-		.min(1, "O nome e obrigatorio.")
-		.max(64, "O nome pode ter no maximo 64 caracteres."),
+		.min(1, "O nome é obrigatório.")
+		.max(64, "O nome pode ter no máximo 64 caracteres."),
 	series: z.string(),
 	repeticoes: z.string(),
 	tempo: z.string(),
@@ -426,7 +426,7 @@ function AddExercicioForm({
 			onSubmit={handleSubmit(onSubmit)}
 			className="flex flex-col gap-3 rounded-lg border border-dashed border-[#e8f0e8] p-4"
 		>
-			<p className="text-xs font-medium text-[#4a5a4a]">Adicionar exercicio</p>
+			<p className="text-xs font-medium text-[#4a5a4a]">Adicionar exercício</p>
 			<div className="flex flex-col gap-1.5">
 				<Controller
 					name="nome"
@@ -434,7 +434,7 @@ function AddExercicioForm({
 					render={({ field, fieldState }) => (
 						<>
 							<Input
-								placeholder="Nome do exercicio"
+								placeholder="Nome do exercício"
 								className="h-8 text-sm"
 								{...field}
 							/>
@@ -448,7 +448,7 @@ function AddExercicioForm({
 					name="series"
 					control={control}
 					render={({ field }) => (
-						<Input placeholder="Series" className="h-8 text-sm" {...field} />
+						<Input placeholder="Séries" className="h-8 text-sm" {...field} />
 					)}
 				/>
 				<Controller
@@ -456,7 +456,7 @@ function AddExercicioForm({
 					control={control}
 					render={({ field }) => (
 						<Input
-							placeholder="Repeticoes"
+							placeholder="Repetições"
 							className="h-8 text-sm"
 							{...field}
 						/>
@@ -480,7 +480,7 @@ function AddExercicioForm({
 					control={control}
 					render={({ field }) => (
 						<Input
-							placeholder="Distancia (km)"
+							placeholder="Distância (km)"
 							className="h-8 text-sm"
 							{...field}
 						/>
@@ -579,8 +579,8 @@ function EditExercicioDialog({
 				</Button>
 			</DialogTrigger>
 			<DialogContent>
-				<DialogTitle>Editar Exercicio</DialogTitle>
-				<DialogDescription>Atualize os dados do exercicio</DialogDescription>
+				<DialogTitle>Editar Exercício</DialogTitle>
+				<DialogDescription>Atualize os dados do exercício</DialogDescription>
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
 						<Controller
@@ -589,7 +589,7 @@ function EditExercicioDialog({
 							render={({ field, fieldState }) => (
 								<>
 									<Label>Nome *</Label>
-									<Input placeholder="Nome do exercicio" {...field} />
+									<Input placeholder="Nome do exercício" {...field} />
 									{fieldState.invalid && (
 										<FieldError errors={[fieldState.error]} />
 									)}
@@ -604,7 +604,7 @@ function EditExercicioDialog({
 								control={control}
 								render={({ field }) => (
 									<>
-										<Label>Series</Label>
+										<Label>Séries</Label>
 										<Input placeholder="Ex: 3" {...field} />
 									</>
 								)}
@@ -616,7 +616,7 @@ function EditExercicioDialog({
 								control={control}
 								render={({ field }) => (
 									<>
-										<Label>Repeticoes</Label>
+										<Label>Repetições</Label>
 										<Input placeholder="Ex: 12" {...field} />
 									</>
 								)}
@@ -642,7 +642,7 @@ function EditExercicioDialog({
 								control={control}
 								render={({ field }) => (
 									<>
-										<Label>Distancia (km)</Label>
+										<Label>Distância (km)</Label>
 										<Input placeholder="Ex: 5" {...field} />
 									</>
 								)}
@@ -736,12 +736,12 @@ export default function PlanosPage() {
 				title={
 					deleteTarget?.type === "treino"
 						? `Excluir treino "${deleteTarget.name}"?`
-						: "Excluir exercicio?"
+						: "Excluir exercício?"
 				}
 				description={
 					deleteTarget?.type === "treino"
-						? "Essa acao tambem removera todos os exercicios associados e nao pode ser desfeita."
-						: "Essa acao nao pode ser desfeita."
+						? "Essa ação também removerá todos os exercícios associados e não pode ser desfeita."
+						: "Essa ação não pode ser desfeita."
 				}
 				onConfirm={handleConfirmDelete}
 			/>
@@ -763,7 +763,7 @@ export default function PlanosPage() {
 					<Dumbbell className="size-12 text-[#4a5a4a]/30" />
 					<p className="mt-4 text-[#4a5a4a]">Nenhum treino cadastrado</p>
 					<p className="text-sm text-[#8a9a8a]">
-						Clique em "Novo Treino" para comecar
+						Clique em "Novo Treino" para começar
 					</p>
 				</div>
 			) : (

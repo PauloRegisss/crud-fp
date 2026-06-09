@@ -56,7 +56,7 @@ export default function DashboardPage() {
 
 	if (!user) return null;
 
-	const completedMetas = metas.filter((m) => m.status === "Concluida").length;
+	const completedMetas = metas.filter((m) => m.status === "Concluída").length;
 	const totalMetas = metas.length;
 	const metaProgress =
 		totalMetas > 0 ? Math.round((completedMetas / totalMetas) * 100) : 0;
@@ -85,16 +85,16 @@ export default function DashboardPage() {
 
 	const statusColors: Record<string, string> = {
 		"Em andamento": "bg-blue-50 text-blue-700",
-		Concluida: "bg-green-50 text-green-700",
+		Concluída: "bg-green-50 text-green-700",
 		Pendente: "bg-amber-50 text-amber-700",
 	};
 
 	return (
 		<div className="p-6 md:p-10">
 			<div className="mb-8">
-				<h2 className="text-2xl font-bold text-[#0f1a0f]">Ola, {user.nome}!</h2>
+				<h2 className="text-2xl font-bold text-[#0f1a0f]">Olá, {user.nome}!</h2>
 				<p className="text-sm text-[#6a7a6a]">
-					Aqui esta o resumo da sua evolucao fitness
+					Aqui está o resumo da sua evolução fitness
 				</p>
 			</div>
 
@@ -119,7 +119,7 @@ export default function DashboardPage() {
 				</div>
 				<div className="rounded-2xl border bg-white p-5 shadow-sm">
 					<div className="mb-3 flex items-center justify-between">
-						<span className="text-sm text-[#6a7a6a]">Exercicios</span>
+						<span className="text-sm text-[#6a7a6a]">Exercícios</span>
 						<div className="flex size-8 items-center justify-center rounded-lg bg-green-50">
 							<Clock3 className="size-4 text-green-600" />
 						</div>
@@ -130,7 +130,7 @@ export default function DashboardPage() {
 				</div>
 				<div className="rounded-2xl border bg-white p-5 shadow-sm">
 					<div className="mb-3 flex items-center justify-between">
-						<span className="text-sm text-[#6a7a6a]">Treinos esta semana</span>
+						<span className="text-sm text-[#6a7a6a]">Treinos da semana</span>
 						<div className="flex size-8 items-center justify-center rounded-lg bg-green-50">
 							<TrendingUp className="size-4 text-green-600" />
 						</div>
@@ -184,7 +184,7 @@ export default function DashboardPage() {
 								<div className="flex-1">
 									<div className="mb-1 flex justify-between text-sm">
 										<span className="text-[#4a5a4a]">
-											{completedMetas} de {totalMetas} metas concluidas
+											{completedMetas} de {totalMetas} metas concluídas
 										</span>
 										<span className="font-medium text-green-600">
 											{metaProgress}%
@@ -221,10 +221,10 @@ export default function DashboardPage() {
 
 				<div className="rounded-2xl border bg-white p-6 shadow-sm">
 					<h3 className="mb-4 text-lg font-semibold text-[#0f1a0f]">
-						Evolucao Fisica
+						Evolução Física
 					</h3>
 					{!evolucoes || evolucoes.length === 0 ? (
-						<p className="text-sm text-[#8a9a8a]">Nenhuma medicao registrada</p>
+						<p className="text-sm text-[#8a9a8a]">Nenhuma medição registrada</p>
 					) : (
 						<div className="flex flex-col gap-3">
 							{evolucoes

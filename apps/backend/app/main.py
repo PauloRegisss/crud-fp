@@ -45,7 +45,7 @@ def load_usuarios() -> list[str]:
         with open(ARQ_USUARIOS, "r", encoding="utf-8") as f:
             return [linha.strip() for linha in f if linha.strip()]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao ler usuarios: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao ler usuários: {e}")
 
 
 def usuario_existe(nome: str) -> bool:
@@ -58,7 +58,7 @@ def criar_usuario(nome: str):
         with open(ARQ_USUARIOS, "a", encoding="utf-8") as f:
             f.write(nome + "\n")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao criar usuario: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao criar usuário: {e}")
 
 
 def checar_usuario(usuario: str):
