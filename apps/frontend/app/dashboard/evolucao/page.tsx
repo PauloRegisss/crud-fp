@@ -1,10 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, Pencil, Plus, Trash2, TrendingUp } from "lucide-react";
+import { LoaderCircle, Plus, Trash2, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import useAuth, { type Evolucao } from "@/app/login/auth-context";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -34,7 +33,7 @@ function CreateEvolucaoDialog({ onCreated }: { onCreated: () => void }) {
 	const [loading, setLoading] = useState(false);
 	const { createEvolucao } = useAuth();
 	const { control, handleSubmit, reset } = useForm<EvolucaoFormData>({
-		resolver: zodResolver(evolucaoSchema as never),
+		resolver: zodResolver(evolucaoSchema as any),
 		defaultValues: {
 			data: "",
 			peso: "",
@@ -48,15 +47,15 @@ function CreateEvolucaoDialog({ onCreated }: { onCreated: () => void }) {
 		try {
 			await createEvolucao({
 				data: data.data,
-				peso: data.peso || undefined,
-				altura: data.altura || undefined,
-				gordura: data.gordura || undefined,
+				peso: data.peso || null,
+				altura: data.altura || null,
+				gordura: data.gordura || null,
 			});
 			reset();
 			setOpen(false);
 			onCreated();
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Ocorreu um erro");
+			console.error(err);
 		} finally {
 			setLoading(false);
 		}
@@ -161,156 +160,6 @@ function CreateEvolucaoDialog({ onCreated }: { onCreated: () => void }) {
 	);
 }
 
-function EditEvolucaoDialog({
-	evolucao,
-	index,
-	onUpdated,
-}: {
-	evolucao: Evolucao;
-	index: number;
-	onUpdated: () => void;
-}) {
-	const [open, setOpen] = useState(false);
-	const [loading, setLoading] = useState(false);
-	const { updateEvolucao } = useAuth();
-	const { control, handleSubmit, reset } = useForm<EvolucaoFormData>({
-		resolver: zodResolver(evolucaoSchema as never),
-		defaultValues: {
-			data: evolucao.data,
-			peso: evolucao.peso || "",
-			altura: evolucao.altura || "",
-			gordura: evolucao.gordura || "",
-		},
-	});
-
-	useEffect(() => {
-		if (open) {
-			reset({
-				data: evolucao.data,
-				peso: evolucao.peso || "",
-				altura: evolucao.altura || "",
-				gordura: evolucao.gordura || "",
-			});
-		}
-	}, [open, evolucao, reset]);
-
-	async function onSubmit(data: EvolucaoFormData) {
-		setLoading(true);
-		try {
-			await updateEvolucao(index, {
-				data: data.data || undefined,
-				peso: data.peso || undefined,
-				altura: data.altura || undefined,
-				gordura: data.gordura || undefined,
-			});
-			setOpen(false);
-			onUpdated();
-		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Ocorreu um erro");
-		} finally {
-			setLoading(false);
-		}
-	}
-
-	return (
-		<Dialog
-			open={open}
-			onOpenChange={(v) => {
-				setOpen(v);
-				if (!v) reset();
-			}}
-		>
-			<DialogTrigger asChild>
-				<Button
-					variant="ghost"
-					size="icon-sm"
-					className="text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-				>
-					<Pencil className="size-4" />
-				</Button>
-			</DialogTrigger>
-			<DialogContent>
-				<DialogTitle>Editar Medição</DialogTitle>
-				<DialogDescription>Atualize seus dados corporais</DialogDescription>
-				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-					<div className="flex flex-col gap-1.5">
-						<Controller
-							name="data"
-							control={control}
-							render={({ field, fieldState }) => (
-								<>
-									<Label>Data *</Label>
-									<Input type="date" {...field} />
-									{fieldState.invalid && (
-										<FieldError errors={[fieldState.error]} />
-									)}
-								</>
-							)}
-						/>
-					</div>
-					<div className="grid grid-cols-3 gap-3">
-						<div className="flex flex-col gap-1.5">
-							<Controller
-								name="peso"
-								control={control}
-								render={({ field }) => (
-									<>
-										<Label>Peso (kg)</Label>
-										<Input
-											type="number"
-											step="0.1"
-											placeholder="75.5"
-											{...field}
-										/>
-									</>
-								)}
-							/>
-						</div>
-						<div className="flex flex-col gap-1.5">
-							<Controller
-								name="altura"
-								control={control}
-								render={({ field }) => (
-									<>
-										<Label>Altura (m)</Label>
-										<Input
-											type="number"
-											step="0.01"
-											placeholder="1.75"
-											{...field}
-										/>
-									</>
-								)}
-							/>
-						</div>
-						<div className="flex flex-col gap-1.5">
-							<Controller
-								name="gordura"
-								control={control}
-								render={({ field }) => (
-									<>
-										<Label>Gordura (%)</Label>
-										<Input
-											type="number"
-											step="0.1"
-											placeholder="18.5"
-											{...field}
-										/>
-									</>
-								)}
-							/>
-						</div>
-					</div>
-					<Button type="submit" disabled={loading} className="mt-2 gap-1.5">
-						{loading && <LoaderCircle className="size-4 animate-spin" />}
-						{loading ? "Salvando..." : "Salvar"}
-					</Button>
-				</form>
-			</DialogContent>
-		</Dialog>
-	);
-}
-
 export default function EvolucaoPage() {
 	const { user, isLoading, fetchEvolucoes, deleteEvolucao } = useAuth();
 	const [evolucoes, setEvolucoes] = useState<Evolucao[]>([]);
@@ -322,13 +171,13 @@ export default function EvolucaoPage() {
 			const data = await fetchEvolucoes();
 			setEvolucoes(data);
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Ocorreu um erro");
+			console.error(err);
 		} finally {
 			setLoading(false);
 		}
 	}
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: false positive
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (user) loadData();
 	}, [user]);
@@ -440,21 +289,14 @@ export default function EvolucaoPage() {
 									</div>
 								</div>
 							</div>
-							<div className="flex items-center gap-1">
-								<EditEvolucaoDialog
-									evolucao={ev}
-									index={i}
-									onUpdated={loadData}
-								/>
-								<Button
-									variant="ghost"
-									size="icon-sm"
-									onClick={() => setDeleteIndex(i)}
-									className="text-red-500 hover:bg-red-50 hover:text-red-600"
-								>
-									<Trash2 className="size-4" />
-								</Button>
-							</div>
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								onClick={() => setDeleteIndex(i)}
+								className="text-red-500 hover:bg-red-50 hover:text-red-600"
+							>
+								<Trash2 className="size-4" />
+							</Button>
 						</div>
 					))}
 				</div>
